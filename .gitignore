@@ -2,3 +2,9 @@
 signals-modeling/\.idea/
 
 random-number-generator/\.idea/
+
+number-generator-with-allocation/\.idea/
+
+*.pyc
+
+number-generator-with-distribution/\.idea/
