@@ -22,6 +22,16 @@ def form_polyharmonic_signal(signal_data):
     return buffer
 
 
+def form_polyharmonic_signal_increases():
+    signal_data = np.array([1, 5, pi / 6])
+    buffer = np.zeros(BUFFER_SIZE)
+    for i in range(BUFFER_SIZE):
+        for j in range(5):
+            buffer[i] += harmonic_value(signal_data[0], i, signal_data[1], signal_data[2])
+        signal_data *= 1.05
+    return buffer
+
+
 def main():
     input_data = [
         SignalData(9, 1, pi / 2),
@@ -31,7 +41,24 @@ def main():
         SignalData(9, 5, pi / 6)
     ]
 
+    input_example_1 = [
+        SignalData(9, 2, 0),
+        SignalData(9, 2, 0),
+        SignalData(9, 2, 0),
+        SignalData(9, 2, 0),
+        SignalData(9, 2, 0)
+    ]
+
+    input_example_2 = [
+        SignalData(9, 1, pi / 2),
+        SignalData(9, 2, pi / 2),
+        SignalData(9, 3, pi / 2),
+        SignalData(9, 4, pi / 2),
+        SignalData(9, 5, pi / 2)
+    ]
+
     buffer = form_polyharmonic_signal(input_data)
+    # buffer = form_polyharmonic_signal_increases()
 
     x = np.arange(BUFFER_SIZE)
     plt.plot(x, buffer, 'r-')
