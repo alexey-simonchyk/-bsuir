@@ -8,3 +8,9 @@ number-generator-with-allocation/\.idea/
 *.pyc
 
 number-generator-with-distribution/\.idea/
+
+COS/signals-modeling/\.idea/
+
+SAaMMod/number-generator-with-distribution/\.idea/
+
+SAaMMod/random-number-generator/\.idea/
