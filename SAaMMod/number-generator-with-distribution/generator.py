@@ -22,11 +22,11 @@ def random_numbers(numbers_amount, previous_number=7, a=17000, m=160001):
 
 def imitate_uniform_distribution(numbers_amount, initial_number, finite_number):
     numbers = random_numbers(numbers_amount)
-    result = np.zeros(numbers_amount)
+    result = []
 
     for i in range(numbers_amount):
-        result[i] = initial_number + (finite_number - initial_number) * numbers[i]
-    return result
+        result.append(initial_number + (finite_number - initial_number) * numbers[i])
+    return np.array(result)
 
 
 def imitate_normal_distribution(numbers_amount, math_wait, standard_deviation):
