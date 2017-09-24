@@ -32,32 +32,34 @@ def imitate_uniform_distribution(numbers_amount, initial_number, finite_number):
 def imitate_normal_distribution(numbers_amount, math_wait, standard_deviation):
     length = numbers_amount * GAUS_STEP
     numbers = random_numbers(length)
-    result = np.zeros(numbers_amount)
+    result = []
 
     for i in range(0, length, GAUS_STEP):
-        result[int(i / GAUS_STEP)] = \
+        result.append(
             math_wait + standard_deviation * sqrt(12 / GAUS_STEP) * (np.sum(numbers[i:i + GAUS_STEP]) - GAUS_STEP / 2)
-    return result
+        )
+    return np.array(result)
 
 
 def imitate_exponential_distribution(numbers_amount, coefficient_lambda):
     numbers = random_numbers(numbers_amount)
-    result = np.zeros(numbers_amount)
+    result = []
 
     for i in range(numbers_amount):
-        result[i] = -1 / coefficient_lambda * log(numbers[i])
-    return result
+        result.append(-1 / coefficient_lambda * log(numbers[i]))
+    return np.array(result)
 
 
 def imitate_gamma_distribution(numbers_amount, coefficient_lambda, coefficient):
     length = numbers_amount * coefficient
     numbers = random_numbers(length)
-    result = np.zeros(numbers_amount)
+    result = []
 
     for i in range(0, length, coefficient):
-        result[int(i / coefficient)] = \
+        result.append(
             -1 / coefficient_lambda * log(reduce(lambda x, a: x * a, numbers[i:i + coefficient]))
-    return result
+        )
+    return np.array(result)
 
 
 def imitate_triangle_distribution(numbers_amount, initial_number, finite_number):
@@ -65,16 +67,15 @@ def imitate_triangle_distribution(numbers_amount, initial_number, finite_number)
     result = []
 
     for i in range(0, numbers_amount, 2):
-        if numbers[i + 1] < 1 - numbers[i]:
-            result.append(initial_number + (finite_number - initial_number) * max(numbers[i: i + 2]))
+        result.append(initial_number + (finite_number - initial_number) * max(numbers[i: i + 2]))
     return np.array(result)
 
 
 def imitate_simpson_distribution(numbers_amount, initial_number, finite_number):
     length = numbers_amount * 2
     numbers = imitate_uniform_distribution(length, initial_number, finite_number)
-    result = np.zeros(numbers_amount)
+    result = []
 
     for i in range(0, length, 2):
-        result[int(i / 2)] = numbers[i] + numbers[i + 1]
-    return result
+        result.append(numbers[i] + numbers[i + 1])
+    return np.array(result)
