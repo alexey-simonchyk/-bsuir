@@ -1,5 +1,11 @@
 #include <cstdio>
+#include <cmath>
 #include "SDL.h"
+
+struct Point {
+    double x;
+    double y;
+};
 
 int main(int argc, char* argv[]) {
 
@@ -28,4 +34,13 @@ int main(int argc, char* argv[]) {
 
     SDL_Quit();
     return 0;
+}
+
+Point epicycloid(double angle, int radius_first, int radius_second) {
+    double x_coordinate;
+    double y_coordinate;
+    x_coordinate = (radius_first + radius_second) * cos(angle) - radius_second * cos((radius_first + radius_second) * angle / radius_second);
+    y_coordinate = (radius_first + radius_second) * sin(angle) - radius_second * sin((radius_first + radius_second) * angle / radius_second);
+    Point point = {.x = x_coordinate, .y = y_coordinate};
+    return point;
 }
