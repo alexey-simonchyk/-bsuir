@@ -73,7 +73,7 @@ def imitate_triangle_distribution(numbers_amount, initial_number, finite_number)
 
 def imitate_simpson_distribution(numbers_amount, initial_number, finite_number):
     length = numbers_amount * 2
-    numbers = imitate_uniform_distribution(length, initial_number, finite_number)
+    numbers = imitate_uniform_distribution(length, initial_number / 2, finite_number / 2)
     result = []
 
     for i in range(0, length, 2):
