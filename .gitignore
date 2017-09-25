@@ -20,3 +20,5 @@ ACG/Epicycloid/\.idea/
 ACG/Epicycloid/lib/
 
 ACG/Epicycloid/cmake-build-debug/
+
+*.bak
