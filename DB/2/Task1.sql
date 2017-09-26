@@ -28,11 +28,7 @@ SELECT
 		ELSE SUBSTRING(dep.GroupName, 1, CHARINDEX(' ', dep.GroupName, 1) - 1)
 	END as DepGroup
 FROM HumanResources.Employee E
-INNER JOIN (
-	SELECT DepartmentID, BusinessEntityID
-	FROM HumanResources.EmployeeDepartmentHistory
-	WHERE EndDate IS NULL
-) EH
-ON EH.BusinessEntityID = E.BusinessEntityID
+INNER JOIN HumanResources.EmployeeDepartmentHistory EH
+ON EH.BusinessEntityID = E.BusinessEntityID AND EH.EndDate IS NULL
 INNER JOIN HumanResources.Department dep on EH.DepartmentID = dep.DepartmentID
 GO

@@ -10,7 +10,7 @@ CREATE TABLE dbo.PersonPhone(
 GO
 
 ALTER TABLE dbo.PersonPhone ADD PRIMARY KEY(BusinessEntityID, PhoneNumber);
-ALTER TABLE dbo.PersonPhone ADD PostalCode nvarchar(15) CONSTRAINT check_Letters CHECK (PostalCode NOT LIKE '[A-Za-z]');
+ALTER TABLE dbo.PersonPhone ADD PostalCode nvarchar(15) CONSTRAINT check_Letters CHECK (PostalCode NOT LIKE '%[A-Za-z]%');
 ALTER TABLE dbo.PersonPhone ADD CONSTRAINT df_postal_code DEFAULT '0' for PostalCode;
 
 INSERT INTO dbo.PersonPhone (BusinessEntityID, PhoneNumber, PhoneNumberTypeID, ModifiedDate)
@@ -18,6 +18,6 @@ INSERT INTO dbo.PersonPhone (BusinessEntityID, PhoneNumber, PhoneNumberTypeID, M
 	FROM AdventureWorks2012.Person.PersonPhone a
 	INNER JOIN AdventureWorks2012.Person.PhoneNumberType t 
 	ON t.PhoneNumberTypeID = a.PhoneNumberTypeID 
-WHERE t.Name LIKE 'Cell';
+WHERE t.Name = 'Cell';
 
 ALTER TABLE dbo.PersonPhone ALTER COLUMN PhoneNumberTypeID bigint null;
