@@ -1,6 +1,7 @@
 import numpy as np
 from math import pi, cos, sin, sqrt, atan2
 from random import choices
+import cmath
 
 
 def harmonic_signal(sampling=2048, buffer_size=2048, begin_phase=3 * pi / 4, amplitude=30, frequency=1):
@@ -37,6 +38,20 @@ def fourier(signal, j=1):
     sum_cos *= 2 / length
     harmonic_begin_phase = atan2(sum_sin, sum_cos)
     return sqrt(sum_sin ** 2 + sum_cos ** 2), harmonic_begin_phase
+
+
+def fft(signal):
+    length = len(signal)
+    if length <= 1: return signal
+    even = fft(signal[0::2])
+    odd = fft(signal[1::2])
+    temp = [cmath.exp(-2j * cmath.pi * k / length) * odd[k] for k in range(length // 2)]
+    return [even[k] + temp[k] for k in range(length // 2)] + \
+           [even[k] - temp[k] for k in range(length // 2)]
+
+
+def amplitude_spectrum(signal):
+    return [abs(temp) for temp in fft(signal)]
 
 
 def restore_signal(harmonic_begin_phase, harmonic_amplitude, sampling=2048, buffer_size=2048):
