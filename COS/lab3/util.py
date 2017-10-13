@@ -1,5 +1,5 @@
 import numpy as np
-from math import pi, cos, sin, sqrt, atan2
+from math import pi, cos, sin, sqrt, atan2, hypot
 from random import choices
 import cmath
 
@@ -13,37 +13,43 @@ def harmonic(i, amplitude=30, frequency=1, begin_phase=3*pi/4, sampling=2048):
     return amplitude * cos(2 * pi * i * frequency / sampling - begin_phase)
 
 
-def polyharmonic_signal(number_signals, amplitudes_input, begin_phases_input, sampling=2048, buffer_size=2048):
+def polyharmonic_signal(number_signals, amplitudes_input, begin_phases_input, buffer_size=2048):
     signal = []
     amplitudes = choices(amplitudes_input, k=number_signals)
     begin_phases = choices(begin_phases_input, k=number_signals)
 
     for i in range(buffer_size):
-        value = 0
-        for frequency, (amplitude, begin_phase) in enumerate(zip(amplitudes, begin_phases)):
-            value += harmonic(i, amplitude, frequency, begin_phase)
+        value = sum([
+            harmonic(i, amplitude, frequency, begin_phase)
+            for frequency, (amplitude, begin_phase) in enumerate(zip(amplitudes, begin_phases))
+        ])
         signal.append(value)
     return np.array(signal)
 
 
-def fourier(signal, j=1):
+def fourier(signal):
     length = len(signal)
-    sum_sin = 0
-    sum_cos = 0
+    harmonic_begin_phases = []
+    harmonic_amplitudes = []
     for i in range(length):
-        temp = 2 * pi * i * j / length
-        sum_sin += signal[i] * sin(temp)
-        sum_cos += signal[i] * cos(temp)
+        sum_sin = 0
+        sum_cos = 0
+        for j in range(length):
+            temp = 2 * pi * j * i / length
+            sum_sin += signal[j] * sin(temp)
+            sum_cos += signal[j] * cos(temp)
 
-    sum_sin *= 2 / length
-    sum_cos *= 2 / length
-    harmonic_begin_phase = atan2(sum_sin, sum_cos)
-    return sqrt(sum_sin ** 2 + sum_cos ** 2), harmonic_begin_phase
+        sum_sin *= 2 / length
+        sum_cos *= 2 / length
+        harmonic_begin_phases.append(atan2(sum_sin, sum_cos))
+        harmonic_amplitudes.append(hypot(sum_sin, sum_cos))
+    return np.array(harmonic_amplitudes), np.array(harmonic_begin_phases)
 
 
 def fft(signal):
     length = len(signal)
-    if length <= 1: return signal
+    if length <= 1:
+        return signal
     even = fft(signal[0::2])
     odd = fft(signal[1::2])
     temp = [cmath.exp(-2j * cmath.pi * k / length) * odd[k] for k in range(length // 2)]
@@ -55,10 +61,13 @@ def amplitude_spectrum(signal):
     return [abs(temp) for temp in fft(signal)]
 
 
-def restore_signal(harmonic_begin_phase, harmonic_amplitude, sampling=2048, buffer_size=2048):
+def restore_signal(harmonic_begin_phases, harmonic_amplitudes, buffer_size=2048):
     result = []
     for i in range(buffer_size):
-        value = harmonic_amplitude * cos(2 * pi * i / sampling - harmonic_begin_phase)
+        value = sum([
+            harmonic(i, harmonic_amplitudes[j], j, harmonic_begin_phases[j])
+            for j in range(buffer_size // 2 - 1)
+        ])
         result.append(value)
     return np.array(result)
 
@@ -66,8 +75,9 @@ def restore_signal(harmonic_begin_phase, harmonic_amplitude, sampling=2048, buff
 def restore_polyharmonic_signal(amplitudes, begin_phases, buffer_size=2048, sampling=2048):
     restored_signal = []
     for i in range(buffer_size):
-        value = amplitudes[0] / 2
-        for j in range(len(amplitudes)):
-            value += amplitudes[j] * cos(2 * pi * (j + 1) * i / sampling - begin_phases[j])
+        value = sum([
+            harmonic(i, amplitudes[j], j, begin_phases[j])
+            for j in range(1, buffer_size // 2 - 1)
+        ]) + amplitudes[0] / 2
         restored_signal.append(value)
     return np.array(restored_signal)
