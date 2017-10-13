@@ -41,6 +41,7 @@ def fourier(signal):
 
         sum_sin *= 2 / length
         sum_cos *= 2 / length
+
         harmonic_begin_phases.append(atan2(sum_sin, sum_cos))
         harmonic_amplitudes.append(hypot(sum_sin, sum_cos))
     return np.array(harmonic_amplitudes), np.array(harmonic_begin_phases)
@@ -58,7 +59,7 @@ def fft(signal):
 
 
 def amplitude_spectrum(signal):
-    return [abs(temp) for temp in fft(signal)]
+    return np.array([abs(temp) for temp in fft(signal)]) / 1000
 
 
 def restore_signal(harmonic_begin_phases, harmonic_amplitudes, buffer_size=2048):
