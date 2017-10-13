@@ -1,5 +1,5 @@
 import numpy as np
-from math import pi, cos, sin, sqrt, atan2, hypot
+from math import pi, cos, sin, atan2, hypot
 from random import choices
 import cmath
 
@@ -20,7 +20,7 @@ def polyharmonic_signal(number_signals, amplitudes_input, begin_phases_input, bu
 
     for i in range(buffer_size):
         value = sum([
-            harmonic(i, amplitude, frequency, begin_phase)
+                harmonic(i, amplitude, frequency, begin_phase)
             for frequency, (amplitude, begin_phase) in enumerate(zip(amplitudes, begin_phases))
         ])
         signal.append(value)
@@ -44,7 +44,7 @@ def fourier(signal):
 
         harmonic_begin_phases.append(atan2(sum_sin, sum_cos))
         harmonic_amplitudes.append(hypot(sum_sin, sum_cos))
-    return np.array(harmonic_amplitudes), np.array(harmonic_begin_phases)
+    return harmonic_amplitudes, harmonic_begin_phases
 
 
 def fft(signal):
@@ -73,7 +73,7 @@ def restore_signal(harmonic_begin_phases, harmonic_amplitudes, buffer_size=2048)
     return np.array(result)
 
 
-def restore_polyharmonic_signal(amplitudes, begin_phases, buffer_size=2048, sampling=2048):
+def restore_polyharmonic_signal(amplitudes, begin_phases, buffer_size=2048):
     restored_signal = []
     for i in range(buffer_size):
         value = sum([
@@ -82,3 +82,30 @@ def restore_polyharmonic_signal(amplitudes, begin_phases, buffer_size=2048, samp
         ]) + amplitudes[0] / 2
         restored_signal.append(value)
     return np.array(restored_signal)
+
+
+def low_pass_filter(amplitudes, begin_phases, upper_value):
+    # to include upper value
+    upper_value += 1
+    amplitudes[upper_value:] = [0] * (len(amplitudes) - upper_value)
+    begin_phases[upper_value:] = [0] * (len(amplitudes) - upper_value)
+    return amplitudes, begin_phases
+
+
+def high_pass_filter(amplitudes, begin_phases, lower_value):
+    amplitudes[:lower_value] = [0] * lower_value
+    begin_phases[:lower_value] = [0] * lower_value
+    return amplitudes, begin_phases
+
+
+def band_pass_filter(amplitudes, begin_phases, bands):
+    prev = 0
+    for band in bands:
+        temp = band[0] - prev
+        begin_phases[prev:band[0]] = [0] * temp
+        amplitudes[prev:band[0]] = [0] * temp
+        prev = band[1]
+    begin_phases[prev:len(begin_phases)] = [0] * (len(begin_phases) - prev)
+    amplitudes[prev:len(amplitudes)] = [0] * (len(amplitudes) - prev)
+    return amplitudes, begin_phases
+

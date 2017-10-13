@@ -13,7 +13,6 @@ USE_HARMONIC = False
 
 
 def main():
-
     if USE_HARMONIC:
         signal, restored_signal, restored_signal_without_begin_phase = harmonic()
     else:
@@ -35,9 +34,13 @@ def polyharmonic():
     signal = util.polyharmonic_signal(NUMBER_HARMONICS, AMPLITUDES, BEGIN_PHASES)
     amplitudes, begin_phases = util.fourier(signal)
 
+    # amplitudes, begin_phases = util.low_pass_filter(amplitudes, begin_phases, 11)
+    # amplitudes, begin_phases = util.high_pass_filter(amplitudes, begin_phases, 6)
+    # amplitudes, begin_phases = util.band_pass_filter(amplitudes, begin_phases, [(3, 6), (13, 17)])
+
     restored_signal = util.restore_polyharmonic_signal(amplitudes, begin_phases)
     restored_signal_without_begin_phases = util.restore_polyharmonic_signal(amplitudes, np.zeros(len(signal)))
-    
+
     return signal, restored_signal, restored_signal_without_begin_phases
 
 
