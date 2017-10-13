@@ -4,12 +4,13 @@ from random import choices
 import cmath
 
 
-def harmonic_signal(sampling=2048, buffer_size=2048, begin_phase=3 * pi / 4, amplitude=30, frequency=1):
-    result = []
-    for i in range(buffer_size):
-        value = amplitude * cos(2 * pi * i * frequency / sampling - begin_phase)
-        result.append(value)
+def harmonic_signal(buffer_size=2048):
+    result = [harmonic(i) for i in range(buffer_size)]
     return np.array(result)
+
+
+def harmonic(i, amplitude=30, frequency=1, begin_phase=3*pi/4, sampling=2048):
+    return amplitude * cos(2 * pi * i * frequency / sampling - begin_phase)
 
 
 def polyharmonic_signal(number_signals, amplitudes_input, begin_phases_input, sampling=2048, buffer_size=2048):
@@ -20,7 +21,7 @@ def polyharmonic_signal(number_signals, amplitudes_input, begin_phases_input, sa
     for i in range(buffer_size):
         value = 0
         for frequency, (amplitude, begin_phase) in enumerate(zip(amplitudes, begin_phases)):
-            value += amplitude * cos(2 * pi * i * frequency / sampling - begin_phase)
+            value += harmonic(i, amplitude, frequency, begin_phase)
         signal.append(value)
     return np.array(signal)
 
