@@ -11,10 +11,14 @@ void drawLine(SDL_Renderer *renderer, Point startPoint, Point endPoint, int dept
 void drawRectangle(SDL_Renderer *renderer, Rectangle &rectangle);
 void update(SDL_Renderer *renderer, Rectangle &firstRectangle, Rectangle &secondRectangle);
 ZBuffer zBuffer;
+
 int windowWidth = DEFAULT_WINDOW_WIDTH;
 int windowHeight = DEFAULT_WINDOW_HEIGHT;
 
 int main(int argc, char* argv[]) {
+    bool mousePressed = false;
+    int xMouse, yMouse, xMousePrev, yMousePrev;
+    Rectangle *currentRectangle;
     SDL_Window *window;
     SDL_Renderer *renderer;
 
@@ -62,21 +66,26 @@ int main(int argc, char* argv[]) {
 
     update(renderer, rectangle, rectangle2);
 
-    SDL_RenderPresent(renderer);
-
     bool check = true;
     int frame = 0;
     while(check) {
         SDL_Event event{};
 
-        /*if (frame == 90000) {
+        if (frame == 9000) {
             frame = 0;
-            rectangle.rotate(4);
-            update(renderer, rectangle, rectangle2);
-            SDL_RenderPresent(renderer);
+            if (mousePressed) {
+                SDL_GetMouseState(&xMouse,&yMouse);
+                int dx = xMouse - xMousePrev;
+                int dy = yMouse - yMousePrev;
+                xMousePrev = xMouse;
+                yMousePrev = yMouse;
+                currentRectangle->rotate(1);
+                currentRectangle->move(dx, dy);
+                update(renderer, rectangle, rectangle2);
+            }
         } else {
             frame++;
-        }*/
+        }
 
         while(SDL_PollEvent(&event) && check) {
             switch(event.type) {
@@ -87,6 +96,31 @@ int main(int argc, char* argv[]) {
                     if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
                         SDL_GetWindowSize(window, &windowWidth, &windowHeight);
                         zBuffer.initBuffer(windowHeight + 1, windowWidth + 1);
+                    }
+                    break;
+                case SDL_MOUSEBUTTONDOWN:
+                    if (event.button.button == SDL_BUTTON_LEFT) {
+                        if (mousePressed) {
+                            mousePressed = false;
+                        } else {
+                            SDL_GetMouseState(&xMouse,&yMouse);
+                            int temp = zBuffer.getValue(xMouse, yMouse);
+                            switch (temp) {
+                                case 1:
+                                    mousePressed = true;
+                                    xMousePrev = xMouse;
+                                    yMousePrev = yMouse;
+                                    currentRectangle = &rectangle;
+                                    break;
+                                case 2:
+                                    mousePressed = true;
+                                    xMousePrev = xMouse;
+                                    yMousePrev = yMouse;
+                                    currentRectangle = &rectangle2;
+                                    break;
+                            }
+                        }
+
                     }
                     break;
                 default:
@@ -180,4 +214,6 @@ void update(SDL_Renderer *renderer, Rectangle &firstRectangle, Rectangle &second
 
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
     drawRectangle(renderer, secondRectangle);
+
+    SDL_RenderPresent(renderer);
 }
