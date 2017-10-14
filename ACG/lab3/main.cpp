@@ -1,20 +1,24 @@
 #include <SDL2/SDL.h>
 #include "src/Point.h"
 #include "src/Rectangle.h"
+#include "src/ZBuffer.h"
 
 #define DEFAULT_WINDOW_WIDTH 640
 #define DEFAULT_WINDOW_HEIGHT 480
 #define DASH_STEP 5
 
-void drawLine(SDL_Renderer *renderer, Point startPoint, Point endPoint, bool dashLine);
+void drawLine(SDL_Renderer *renderer, Point startPoint, Point endPoint, int depth);
 void drawRectangle(SDL_Renderer *renderer, Rectangle &rectangle);
+void update(SDL_Renderer *renderer, Rectangle &firstRectangle, Rectangle &secondRectangle);
+ZBuffer zBuffer;
+int windowWidth = DEFAULT_WINDOW_WIDTH;
+int windowHeight = DEFAULT_WINDOW_HEIGHT;
 
 int main(int argc, char* argv[]) {
     SDL_Window *window;
     SDL_Renderer *renderer;
 
-    int windowWidth = DEFAULT_WINDOW_WIDTH;
-    int windowHeight = DEFAULT_WINDOW_HEIGHT;
+
 
     SDL_Init(SDL_INIT_VIDEO);
 
@@ -32,15 +36,32 @@ int main(int argc, char* argv[]) {
     }
     renderer = SDL_CreateRenderer(window, -1, 0);
 
-    Point points[4];
-    points[0] = {.x = 160, .y = 110};
-    points[1] = {.x = 350, .y = 110};
-    points[2] = {.x = 350, .y = 300};
-    points[3] = {.x = 160, .y = 300};
+    Point points[4] = {
+        {.x = 50, .y = 50},
+        {.x = 150, .y = 50},
+        {.x = 150, .y = 250},
+        {.x = 50, .y = 250}
+    };
+
+    Point points_1[4] = {
+            {.x = 400, .y = 300},
+            {.x = 500, .y = 300},
+            {.x = 500, .y = 500},
+            {.x = 400, .y = 500}
+    };
+
+    zBuffer.initBuffer(DEFAULT_WINDOW_HEIGHT + 1, DEFAULT_WINDOW_WIDTH + 1);
 
     Rectangle rectangle;
     rectangle.setPoints(points);
-    drawRectangle(renderer, rectangle);
+    rectangle.setDepth(1);
+
+    Rectangle rectangle2;
+    rectangle2.setPoints(points_1);
+    rectangle2.setDepth(2);
+
+    update(renderer, rectangle, rectangle2);
+
     SDL_RenderPresent(renderer);
 
     bool check = true;
@@ -48,14 +69,15 @@ int main(int argc, char* argv[]) {
     while(check) {
         SDL_Event event{};
 
-        if (frame >= 90000) {
+        /*if (frame == 90000) {
             frame = 0;
             rectangle.rotate(4);
-            drawRectangle(renderer, rectangle);
+            update(renderer, rectangle, rectangle2);
             SDL_RenderPresent(renderer);
         } else {
             frame++;
-        }
+        }*/
+
         while(SDL_PollEvent(&event) && check) {
             switch(event.type) {
                 case SDL_QUIT:
@@ -64,8 +86,7 @@ int main(int argc, char* argv[]) {
                 case SDL_WINDOWEVENT:
                     if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
                         SDL_GetWindowSize(window, &windowWidth, &windowHeight);
-
-                        SDL_RenderPresent(renderer);
+                        zBuffer.initBuffer(windowHeight + 1, windowWidth + 1);
                     }
                     break;
                 default:
@@ -74,17 +95,31 @@ int main(int argc, char* argv[]) {
         }
     }
 
-
-
-
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
     return 0;
 }
 
+void drawPoint(SDL_Renderer *renderer, int x, int y, bool &dashLine, int &dashStep, int depth) {
+    if (x < 0 || y < 0 || x >= windowWidth || y >= windowHeight) {
+        return;
+    }
+    dashLine = zBuffer.getValue(x, y) > 0;
+    if (dashLine) {
+        if (dashStep % DASH_STEP == 0 || dashStep % DASH_STEP == 1) {
+            SDL_RenderDrawPoint(renderer, x, y);
+        }
+        dashStep++;
+    } else {
+        SDL_RenderDrawPoint(renderer, x, y);
+        zBuffer.setValue(x, y, depth);
+    }
+}
 
-void drawLine(SDL_Renderer *renderer, Point startPoint, Point endPoint, bool dashLine) {
+
+void drawLine(SDL_Renderer *renderer, Point startPoint, Point endPoint, int depth) {
+    bool dashLine = false;
     int dashStep = 0;
     int dx = abs(endPoint.x - startPoint.x);
     int dy = abs(endPoint.y - startPoint.y);
@@ -104,14 +139,7 @@ void drawLine(SDL_Renderer *renderer, Point startPoint, Point endPoint, bool das
             } else {
                 d += d1;
             }
-            if (dashLine) {
-                if (dashStep % DASH_STEP == 0 || dashStep % DASH_STEP == 1) {
-                    SDL_RenderDrawPoint(renderer, x, y);
-                }
-                dashStep++;
-            } else {
-                SDL_RenderDrawPoint(renderer, x, y);
-            }
+            drawPoint(renderer, x, y, dashLine, dashStep, depth);
         }
     } else {
         int d = (dx << 1) - dy;
@@ -126,23 +154,30 @@ void drawLine(SDL_Renderer *renderer, Point startPoint, Point endPoint, bool das
             } else {
                 d += d1;
             }
-            if (dashLine) {
-                if (dashStep % DASH_STEP == 0 || dashStep % DASH_STEP == 1) {
-                    SDL_RenderDrawPoint(renderer, x, y);
-                }
-                dashStep++;
-            } else {
-                SDL_RenderDrawPoint(renderer, x, y);
-            }
+            drawPoint(renderer, x, y, dashLine, dashStep, depth);
         }
     }
 }
 
 void drawRectangle(SDL_Renderer *renderer, Rectangle &rectangle) {
+
+    for (int i = 0; i < 4; i++) {
+        drawLine(renderer, rectangle.getPoints()[i], rectangle.getPoints()[(i + 1) % 4], rectangle.getDepth());
+    }
+    Point min = rectangle.getLowPoint();
+    Point max = rectangle.getMaxPoint();
+    zBuffer.fillRect(min.x, min.y, max.x, max.y, rectangle.getDepth());
+
+}
+
+void update(SDL_Renderer *renderer, Rectangle &firstRectangle, Rectangle &secondRectangle) {
+    zBuffer.clearBuffer();
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderClear(renderer);
+
     SDL_SetRenderDrawColor(renderer, 51, 191, 16, 255);
-    for (int i = 0; i < 4; i++) {
-        drawLine(renderer, rectangle.getPoints()[i], rectangle.getPoints()[(i + 1) % 4], false);
-    }
+    drawRectangle(renderer, firstRectangle);
+
+    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+    drawRectangle(renderer, secondRectangle);
 }

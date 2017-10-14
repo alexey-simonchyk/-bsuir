@@ -5,6 +5,8 @@
 class Point {
 public:
     int x, y;
+public:
+    void set(int x, int y);
 };
 
 

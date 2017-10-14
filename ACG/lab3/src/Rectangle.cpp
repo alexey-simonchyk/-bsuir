@@ -32,3 +32,37 @@ void Rectangle::move(int x, int y) {
         point.y += y;
     }
 }
+
+int Rectangle::getDepth() {
+    return this->depthValue;
+}
+
+void Rectangle::setDepth(int value) {
+    this->depthValue = value;
+}
+
+Point Rectangle::getMaxPoint() {
+    Point max = {.x = this->points[0].x, .y = this->points[0].y};
+    for (int i = 1; i < 4; i++) {
+        if (max.x < this->points[i].x) {
+            max.x = this->points[i].x;
+        }
+        if (max.y < this->points[i].y) {
+            max.y = this->points[i].y;
+        }
+    }
+    return max;
+}
+
+Point Rectangle::getLowPoint() {
+    Point min = {.x = this->points[0].x, .y = this->points[0].y};
+    for (int i = 1; i < 4; i++) {
+        if (min.x > this->points[i].x) {
+            min.x = this->points[i].x;
+        }
+        if (min.y > this->points[i].y) {
+            min.y = this->points[i].y;
+        }
+    }
+    return min;
+}
