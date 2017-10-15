@@ -1,6 +1,6 @@
 #ifndef LAB3_ZBUFFER_H
 #define LAB3_ZBUFFER_H
-
+#define BORDER_WIDTH 40
 
 class ZBuffer {
     int height = 0, width = 0;

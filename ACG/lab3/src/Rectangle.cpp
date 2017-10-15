@@ -13,9 +13,7 @@ Point *Rectangle::getPoints() {
 
 void Rectangle::rotate(double angle) {
     angle *= 3.14159265 / 180;
-    Point center;
-    center.x = (this->points[0].x + this->points[2].x) / 2;
-    center.y = (this->points[0].y + this->points[2].y) / 2;
+    Point center = this->getCenter();
 
     for (auto &point : this->points) {
         int x1 = point.x - center.x;
@@ -65,4 +63,11 @@ Point Rectangle::getLowPoint() {
         }
     }
     return min;
+}
+
+Point Rectangle::getCenter() {
+    Point center;
+    center.x = (this->points[0].x + this->points[2].x) / 2;
+    center.y = (this->points[0].y + this->points[2].y) / 2;
+    return center;
 }

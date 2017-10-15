@@ -14,6 +14,7 @@ public:
     void move(int x, int y);
     void setDepth(int value);
     int getDepth();
+    Point getCenter();
 
     Point getMaxPoint();
     Point getLowPoint();

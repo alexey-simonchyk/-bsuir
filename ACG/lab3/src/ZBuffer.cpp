@@ -29,9 +29,23 @@ void ZBuffer::setValue(int x, int y, int value) {
 }
 
 void ZBuffer::clearBuffer() {
-    for (int i = 0; i < this->height; i++) {
-        for (int j = 0; j < this->width; j++) {
+    for (int i = 0; i <= this->height; i++) {
+        for (int j = 0; j <= this->width; j++) {
             this->buffer[i][j] = 0;
+        }
+    }
+    // create border
+    for (int i = 0; i < BORDER_WIDTH; i++) {
+        for (int j = 0; j <= this->width; j++) {
+            this->buffer[i][j] = 1;
+            this->buffer[this->height - i][j] = 1;
+        }
+    }
+
+    for (int i = BORDER_WIDTH; i <= this->height - BORDER_WIDTH; i++) {
+        for (int j = 0; j < BORDER_WIDTH; j++) {
+            this->buffer[i][j] = 1;
+            this->buffer[i][this->width - j] = 1;
         }
     }
 }
@@ -53,11 +67,9 @@ void ZBuffer::fillRectInBuffer(int xMin, int yMin, int xMax, int yMax, int value
                 for (int k = startPoint.x + 1; k < j; k++) {
                     this->buffer[i][k] = value;
                 }
-                startPoint.x = j;
-                startPoint.y = i;
-            } else if (temp != 0) {
-                startPoint.x = j;
-                startPoint.y = i;
+            }
+            if (temp != 0) {
+                startPoint.set(j, i);
             }
         }
     }

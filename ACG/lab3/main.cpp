@@ -2,6 +2,7 @@
 #include "src/Point.h"
 #include "src/Rectangle.h"
 #include "src/ZBuffer.h"
+#include "src/Animation.h"
 
 #define DEFAULT_WINDOW_WIDTH 640
 #define DEFAULT_WINDOW_HEIGHT 480
@@ -20,6 +21,7 @@ int windowHeight = DEFAULT_WINDOW_HEIGHT;
 int main(int argc, char* argv[]) {
 
     bool mousePressed = false;
+    Animation animation;
     int xMouse, yMouse, xMousePrev = 0, yMousePrev = 0;
     Rectangle *currentRectangle = nullptr;
     SDL_Window *window;
@@ -68,6 +70,7 @@ int main(int argc, char* argv[]) {
     rectangle2.setDepth(3);
 
     Rectangle rectangles[2] = {rectangle, rectangle2};
+    animation.init(rectangles);
 
     update(renderer, rectangles[0], rectangles[1]);
 
@@ -76,6 +79,15 @@ int main(int argc, char* argv[]) {
 
     while(check) {
         SDL_Event event{};
+        currentTime = SDL_GetTicks();
+
+        if (animation.isPlayAnimation()) {
+            if (currentTime - lastTime > 50) {
+                animation.animate(rectangles);
+                update(renderer, rectangles[0], rectangles[1]);
+                lastTime = currentTime;
+            }
+        }
 
         if (mousePressed) {
             SDL_GetMouseState(&xMouse,&yMouse);
@@ -86,7 +98,6 @@ int main(int argc, char* argv[]) {
             xMousePrev = xMouse;
             yMousePrev = yMouse;
 
-            currentTime = SDL_GetTicks();
             if (currentTime - lastTime > 50) {
                 currentRectangle->rotate(ROTATE_ANGLE);
                 lastTime = currentTime;
@@ -114,18 +125,21 @@ int main(int argc, char* argv[]) {
                         if (mousePressed) {
                             mousePressed = false;
                         } else {
-                            SDL_GetMouseState(&xMouse,&yMouse);
-                            int temp = zBuffer.getValue(xMouse, yMouse);
-                            if (temp > 1) {
-                                for (auto &tempRect : rectangles) {
-                                    if (temp == tempRect.getDepth()) {
-                                        mousePressed = true;
-                                        xMousePrev = xMouse;
-                                        yMousePrev = yMouse;
-                                        currentRectangle = &tempRect;
+                            if (!animation.isPlayAnimation()) {
+                                SDL_GetMouseState(&xMouse,&yMouse);
+                                int temp = zBuffer.getValue(xMouse, yMouse);
+                                if (temp > 1) {
+                                    for (auto &tempRect : rectangles) {
+                                        if (temp == tempRect.getDepth()) {
+                                            mousePressed = true;
+                                            xMousePrev = xMouse;
+                                            yMousePrev = yMouse;
+                                            currentRectangle = &tempRect;
+                                        }
                                     }
                                 }
                             }
+
                         }
 
                     }
@@ -141,6 +155,7 @@ int main(int argc, char* argv[]) {
     SDL_Quit();
     return 0;
 }
+
 
 void drawPoint(SDL_Renderer *renderer, int x, int y, bool &dashLine, int &dashStep, int depth) {
     if (x < 0 || y < 0 || x >= windowWidth || y >= windowHeight) {
