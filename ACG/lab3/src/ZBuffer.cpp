@@ -3,6 +3,12 @@
 
 
 void ZBuffer::initBuffer(int screenHeight, int screenWidth) {
+    if (this->height > 0 && this->width > 0) {
+        for (int i = 0; i <= this->height; i++) {
+            delete this->buffer[i];
+        }
+        delete this->buffer;
+    }
     this->height = screenHeight - 1;
     this->width = screenWidth - 1;
     this->buffer = new int*[screenHeight];
@@ -30,7 +36,7 @@ void ZBuffer::clearBuffer() {
     }
 }
 
-void ZBuffer::fillRect(int xMin, int yMin, int xMax, int yMax, int value) {
+void ZBuffer::fillRectInBuffer(int xMin, int yMin, int xMax, int yMax, int value) {
     Point startPoint = {.x = -1, .y = -1};
 
     xMin = xMin < 0 ? 0 : xMin;

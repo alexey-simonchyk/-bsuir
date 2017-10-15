@@ -5,6 +5,8 @@
 
 #define DEFAULT_WINDOW_WIDTH 640
 #define DEFAULT_WINDOW_HEIGHT 480
+
+#define ROTATE_ANGLE 2
 #define DASH_STEP 5
 
 void drawLine(SDL_Renderer *renderer, Point startPoint, Point endPoint, int depth);
@@ -16,9 +18,10 @@ int windowWidth = DEFAULT_WINDOW_WIDTH;
 int windowHeight = DEFAULT_WINDOW_HEIGHT;
 
 int main(int argc, char* argv[]) {
+
     bool mousePressed = false;
-    int xMouse, yMouse, xMousePrev, yMousePrev;
-    Rectangle *currentRectangle;
+    int xMouse, yMouse, xMousePrev = 0, yMousePrev = 0;
+    Rectangle *currentRectangle = nullptr;
     SDL_Window *window;
     SDL_Renderer *renderer;
 
@@ -58,34 +61,41 @@ int main(int argc, char* argv[]) {
 
     Rectangle rectangle;
     rectangle.setPoints(points);
-    rectangle.setDepth(1);
+    rectangle.setDepth(2);
 
     Rectangle rectangle2;
     rectangle2.setPoints(points_1);
-    rectangle2.setDepth(2);
+    rectangle2.setDepth(3);
 
-    update(renderer, rectangle, rectangle2);
+    Rectangle rectangles[2] = {rectangle, rectangle2};
+
+    update(renderer, rectangles[0], rectangles[1]);
 
     bool check = true;
-    int frame = 0;
+    int lastTime = 0, currentTime;
+
     while(check) {
         SDL_Event event{};
 
-        if (frame == 9000) {
-            frame = 0;
-            if (mousePressed) {
-                SDL_GetMouseState(&xMouse,&yMouse);
-                int dx = xMouse - xMousePrev;
-                int dy = yMouse - yMousePrev;
-                xMousePrev = xMouse;
-                yMousePrev = yMouse;
-                currentRectangle->rotate(1);
-                currentRectangle->move(dx, dy);
-                update(renderer, rectangle, rectangle2);
+        if (mousePressed) {
+            SDL_GetMouseState(&xMouse,&yMouse);
+
+            int dx = xMouse - xMousePrev;
+            int dy = yMouse - yMousePrev;
+
+            xMousePrev = xMouse;
+            yMousePrev = yMouse;
+
+            currentTime = SDL_GetTicks();
+            if (currentTime - lastTime > 50) {
+                currentRectangle->rotate(ROTATE_ANGLE);
+                lastTime = currentTime;
             }
-        } else {
-            frame++;
+
+            currentRectangle->move(dx, dy);
+            update(renderer, rectangles[0], rectangles[1]);
         }
+
 
         while(SDL_PollEvent(&event) && check) {
             switch(event.type) {
@@ -96,6 +106,7 @@ int main(int argc, char* argv[]) {
                     if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
                         SDL_GetWindowSize(window, &windowWidth, &windowHeight);
                         zBuffer.initBuffer(windowHeight + 1, windowWidth + 1);
+                        update(renderer, rectangles[0], rectangles[1]);
                     }
                     break;
                 case SDL_MOUSEBUTTONDOWN:
@@ -105,19 +116,15 @@ int main(int argc, char* argv[]) {
                         } else {
                             SDL_GetMouseState(&xMouse,&yMouse);
                             int temp = zBuffer.getValue(xMouse, yMouse);
-                            switch (temp) {
-                                case 1:
-                                    mousePressed = true;
-                                    xMousePrev = xMouse;
-                                    yMousePrev = yMouse;
-                                    currentRectangle = &rectangle;
-                                    break;
-                                case 2:
-                                    mousePressed = true;
-                                    xMousePrev = xMouse;
-                                    yMousePrev = yMouse;
-                                    currentRectangle = &rectangle2;
-                                    break;
+                            if (temp > 1) {
+                                for (auto &tempRect : rectangles) {
+                                    if (temp == tempRect.getDepth()) {
+                                        mousePressed = true;
+                                        xMousePrev = xMouse;
+                                        yMousePrev = yMouse;
+                                        currentRectangle = &tempRect;
+                                    }
+                                }
                             }
                         }
 
@@ -200,7 +207,7 @@ void drawRectangle(SDL_Renderer *renderer, Rectangle &rectangle) {
     }
     Point min = rectangle.getLowPoint();
     Point max = rectangle.getMaxPoint();
-    zBuffer.fillRect(min.x, min.y, max.x, max.y, rectangle.getDepth());
+    zBuffer.fillRectInBuffer(min.x, min.y, max.x, max.y, rectangle.getDepth());
 
 }
 

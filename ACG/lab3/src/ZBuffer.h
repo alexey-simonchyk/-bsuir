@@ -3,14 +3,14 @@
 
 
 class ZBuffer {
-    int height, width;
+    int height = 0, width = 0;
 public:
-    int **buffer;
+    int **buffer{};
     void initBuffer(int screenHeight, int screenWidth);
     int getValue(int x, int y);
     void setValue(int x, int y, int value);
     void clearBuffer();
-    void fillRect(int xMin, int yMin, int xMax, int yMax, int value);
+    void fillRectInBuffer(int xMin, int yMin, int xMax, int yMax, int value);
 };
 
 
