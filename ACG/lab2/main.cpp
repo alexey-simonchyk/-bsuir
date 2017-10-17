@@ -6,7 +6,7 @@
 #define DEFAULT_WINDOW_WIDTH 640
 #define DEFAULT_WINDOW_HEIGHT 480
 #define NUMBER_ANGLES 4
-#define ROTATION_ANGLE 0.1
+#define ROTATION_ANGLE 0.5
 
 
 struct Point {
@@ -114,16 +114,22 @@ void drawLine(SDL_Renderer *renderer, Point startPoint, Point endPoint) {
 }
 
 void drawFigure(SDL_Renderer *renderer, std::array<Point, NUMBER_ANGLES> points, double angle) {
-    const int steps = 5; // number steps here!!!
+    int steps = int(ROTATION_ANGLE * 10) + 1; // number steps here!!!
     for (int i = 0; i < steps; i++) {
         for (int j = 0; j < points.size(); j++) {
             drawLine(renderer, points[j], points[(j + 1) % points.size()]);
         }
 
-        for (int j = 0; j < points.size(); j++) {
-            points[j].x = int ((1 - angle) * points[j].x + angle * points[(j + 1) % points.size()].x);
-            points[j].y = int((1 - angle) * points[j].y + angle * points[(j + 1) % points.size()].y);
+        double temp = tan(ROTATION_ANGLE * 2 * (3.14 / (4 * (i + 1)))) / (tan(ROTATION_ANGLE * 2 * (3.14 / (4 * (i + 1)))) + 1);
+        int x = points[0].x;
+        int y = points[0].y;
+        for (int j = 0; j < points.size() - 1; j++) {
+            points[j].x = int ((1 - temp) * points[j].x + temp * points[(j + 1) % points.size()].x);
+            points[j].y = int((1 - temp) * points[j].y + temp * points[(j + 1) % points.size()].y);
         }
+        points[3].x = int ((1 - temp) * points[3].x + temp * x);
+        points[3].y = int((1 - temp) * points[3].y + temp * y);
+
     }
 }
 
