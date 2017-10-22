@@ -31,10 +31,16 @@ class Generator(BaseElement):
     def __init__(self, generate_probability, next_element):
         super().__init__(next_element)
         self.__generate_probability = generate_probability
+        self.__generated_number = 0
+
+    @property
+    def generated_number(self):
+        return self.__generated_number
 
     def handle(self):
         temp = random.randint(0, 100)
         if temp < self.__generate_probability:
+            self.__generated_number += 1
             if type(self.next_element) is Queue:
                 self.next_element.put_in_queue()
             elif self.next_element.status == 0:
@@ -62,6 +68,11 @@ class HandlerWithReject(BaseElement):
     def __init__(self, probability, next_element):
         super().__init__(next_element)
         self.__probability = probability
+        self.__number_rejected = 0
+
+    @property
+    def number_rejected(self):
+        return self.__number_rejected
 
     def handle(self):
         if self.status == 0:
@@ -74,6 +85,7 @@ class HandlerWithReject(BaseElement):
                 return
         if temp < self.__probability and self.next_element.status > 0:
             self.status = 0
+            self.__number_rejected += 1
             return
 
 

@@ -35,6 +35,7 @@ def main():
     a = counter.status / number_steps
     l = queue.number_elements / number_steps
     w = l / a
+    q = counter.status / generator.generated_number
 
     print()
     for key, value in STATES_PROBABILITY.items():
@@ -43,6 +44,7 @@ def main():
     print('\nA = ' + str(a))
     print('L = ' + str(l))
     print('W = ' + str(w))
+    print('Q = ' + str(q))
 
 
 if __name__ == '__main__':
