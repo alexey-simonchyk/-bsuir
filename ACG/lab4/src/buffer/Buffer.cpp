@@ -1,3 +1,4 @@
+#include <cmath>
 #include "Buffer.h"
 
 void Buffer::clearTempBuffer() {
@@ -20,12 +21,12 @@ void Buffer::initBuffer(int screenHeight, int screenWidth) {
 
     this->height = screenHeight - 1;
     this->width = screenWidth - 1;
-    this->buffer = new float*[screenHeight];
-    this->temp_buffer = new float*[screenHeight];
+    this->buffer = new double*[screenHeight];
+    this->temp_buffer = new double*[screenHeight];
 
     for (int i = 0; i < screenHeight; i++) {
-        this->buffer[i] = new float[screenWidth];
-        this->temp_buffer[i] = new float[screenWidth];
+        this->buffer[i] = new double[screenWidth];
+        this->temp_buffer[i] = new double[screenWidth];
     }
     this->clearBuffer();
     this->clearTempBuffer();
@@ -47,14 +48,14 @@ void Buffer::fillPlaneInTempBuffer(Point min, Point max, Plane &plane) {
     min.y = min.y < 0 ? 0 : min.y;
     max.x = max.x < 0 ? 0 : max.x;
     max.y = max.y < 0 ? 0 : max.y;
-    for (int i = min.y; i <= max.y && i <= this->height; i++) {
+    for (int i = int(round(min.y)); i <= max.y && i <= this->height; i++) {
         startPoint.x = -1;
-        for (int j = min.x; j <= max.x && j <= this->width; j++) {
-            float temp = this->temp_buffer[i][j];
+        for (int j = int(round(min.x)); j <= max.x && j <= this->width; j++) {
+            double temp = this->temp_buffer[i][j];
 
             if (temp != BACKGROUND_BUFFER && startPoint.x != -1) {
-                for (int k = startPoint.x + 1; k < j; k++) {
-                    float z = plane.getZValue(k, i);
+                for (int k = int(round(startPoint.x + 1)); k < j; k++) {
+                    double z = plane.getZValue(k - (this->width + 1) / 2, i - (this->height + 1) / 2);
                     this->temp_buffer[i][k] = z;
                 }
             }
@@ -65,7 +66,7 @@ void Buffer::fillPlaneInTempBuffer(Point min, Point max, Plane &plane) {
     }
 }
 
-void Buffer::setTempBuffer(int x, int y, float z) {
+void Buffer::setTempBuffer(int x, int y, double z) {
     this->temp_buffer[y][x] = z;
 }
 
@@ -79,6 +80,6 @@ void Buffer::shiftToMainBuffer() {
     }
 }
 
-float Buffer::getValue(int x, int y) {
+double Buffer::getValue(int x, int y) {
     return this->buffer[y][x];
 }

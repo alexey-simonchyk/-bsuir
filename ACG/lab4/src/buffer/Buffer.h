@@ -7,16 +7,16 @@
 
 class Buffer {
     int height = 0, width = 0;
-    float **buffer{};
-    float **temp_buffer{};
+    double **buffer{};
+    double **temp_buffer{};
 public:
     void fillPlaneInTempBuffer(Point min, Point max, Plane &plane);
-    void setTempBuffer(int x, int y, float z);
+    void setTempBuffer(int x, int y, double z);
     void clearTempBuffer();
     void initBuffer(int screenHeight, int screenWidth);
     void clearBuffer();
     void shiftToMainBuffer();
-    float getValue(int x, int y);
+    double getValue(int x, int y);
 };
 
 

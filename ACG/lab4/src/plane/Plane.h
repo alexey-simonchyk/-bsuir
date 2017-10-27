@@ -6,14 +6,19 @@
 
 class Plane {
     Point points[4];
-    float A1, A2, A3;
+    Point rotationPoints[4];
+    double A, B, C, D;
 public:
-    void setPoints(Point &point1, Point &point2, Point &point3, Point &point4);
+    void setPoints(Point point1, Point point2, Point point3, Point point4);
     Point* getPoints();
 
-    Point getMaxPoint();
-    Point getLowPoint();
-    float getZValue(int x, int y);
+    Point getMaxPoint(int windowWidth, int windowHeight);
+    Point getLowPoint(int windowWidth, int windowHeight);
+    double getZValue(double x, double y);
+    void rotateX(double angle);
+    void rotateY(double angle);
+    void rotateZ(double angle);
+    void calculatePlane();
 };
 
 

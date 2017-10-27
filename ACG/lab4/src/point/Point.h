@@ -4,8 +4,8 @@
 
 class Point {
 public:
-    int x, y, z;
-    void set(int x, int y, int z);
+    double x, y, z;
+    void set(double x, double y, double z);
 };
 
 
