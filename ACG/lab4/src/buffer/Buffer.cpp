@@ -42,18 +42,19 @@ void Buffer::clearBuffer() {
 
 void Buffer::fillPlaneInTempBuffer(Point min, Point max, Plane &plane) {
 
-    Point startPoint = {.x = -1, .y = -1, .z = -1};
+    Point startPoint = {.x = -600, .y = -1, .z = -1};
 
     min.x = min.x < 0 ? 0 : min.x;
     min.y = min.y < 0 ? 0 : min.y;
     max.x = max.x < 0 ? 0 : max.x;
     max.y = max.y < 0 ? 0 : max.y;
+
     for (int i = int(round(min.y)); i <= max.y && i <= this->height; i++) {
-        startPoint.x = -1;
+        startPoint.x = -600;
         for (int j = int(round(min.x)); j <= max.x && j <= this->width; j++) {
             double temp = this->temp_buffer[i][j];
 
-            if (temp != BACKGROUND_BUFFER && startPoint.x != -1) {
+            if (temp != BACKGROUND_BUFFER && startPoint.x != -600) {
                 for (int k = int(round(startPoint.x + 1)); k < j; k++) {
                     double z = plane.getZValue(k - (this->width + 1) / 2, i - (this->height + 1) / 2);
                     this->temp_buffer[i][k] = z;
@@ -71,8 +72,8 @@ void Buffer::setTempBuffer(int x, int y, double z) {
 }
 
 void Buffer::shiftToMainBuffer() {
-    for (int i = 0; i <= this->height; i++) {
-        for (int j = 0; j <= this->width; j++) {
+    for (int i = 0; i < this->height; i++) {
+        for (int j = 0; j < this->width; j++) {
             if (this->buffer[i][j] > this->temp_buffer[i][j]) {
                 this->buffer[i][j] = this->temp_buffer[i][j];
             }
@@ -82,4 +83,28 @@ void Buffer::shiftToMainBuffer() {
 
 double Buffer::getValue(int x, int y) {
     return this->buffer[y][x];
+}
+
+void Buffer::fillHoleInTempBuffer(Point min, Point max, Plane &plane) {
+    Point startPoint = {.x = -600, .y = -1, .z = -1};
+
+    min.x = min.x < 0 ? 0 : min.x;
+    min.y = min.y < 0 ? 0 : min.y;
+    max.x = max.x < 0 ? 0 : max.x;
+    max.y = max.y < 0 ? 0 : max.y;
+
+    for (int i = int(round(min.y)); i <= max.y && i <= this->height; i++) {
+        startPoint.x = -600;
+        for (int j = int(round(min.x)); j <= max.x && j <= this->width; j++) {
+            double temp = this->temp_buffer[i][j];
+            if (temp == HOLE && startPoint.x != -600) {
+                for (int k = int(round(startPoint.x + 1)); k < j; k++) {
+                    this->temp_buffer[i][k] = BACKGROUND_BUFFER;
+                }
+            }
+            if (temp == HOLE) {
+                startPoint.set(j, i, 0);
+            }
+        }
+    }
 }

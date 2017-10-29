@@ -9,8 +9,11 @@ class Plane {
     Point rotationPoints[4];
     double A, B, C, D;
 public:
+    Plane *hole;
+    bool withHole = false;
     void setPoints(Point point1, Point point2, Point point3, Point point4);
     Point* getPoints();
+    void setHole(Plane* plane);
 
     Point getMaxPoint(int windowWidth, int windowHeight);
     Point getLowPoint(int windowWidth, int windowHeight);
