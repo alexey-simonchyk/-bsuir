@@ -130,3 +130,25 @@ void Plane::setHole(Plane *plane) {
     this->withHole = true;
 }
 
+void Plane::rotateAxis(double rx, double ry, double rz, double angle) {
+    if (withHole) {
+        hole->rotateAxis(rx, ry, rz, angle);
+    }
+    angle *= 3.14159265 / 180;
+    double temp = 1 - cos(angle);
+    for (int i = 0; i < 4; i++) {
+        double x = rotationPoints[i].x, y = rotationPoints[i].y, z = rotationPoints[i].z;
+        double tempX = x * (rx * rx * temp + cos(angle)) + y * (rx * ry * temp - rz * sin(angle)) + z * (rx * rz * temp + ry * sin(angle));
+        double tempY = x * (rx * ry * temp + rz * sin(angle)) + y * (ry * ry * temp + cos(angle)) + z * (ry * rz * temp - rx * sin(angle));
+        double tempZ = x * (rx * rz * temp - ry * sin(angle)) + y * (ry * rz * temp + rx * sin(angle)) + z * (rz *  rz * temp + cos(angle));
+        points[i].x = round(tempX);
+        points[i].y = round(tempY);
+        points[i].z = round(tempZ);
+        rotationPoints[i].x = tempX;
+        rotationPoints[i].y = tempY;
+        rotationPoints[i].z = tempZ;
+    }
+
+    this->calculatePlane();
+}
+

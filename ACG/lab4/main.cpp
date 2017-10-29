@@ -101,11 +101,11 @@ int main(int argc, char* argv[]) {
             plane1, plane2, plane3, plane4, plane5, plane6, plane7, plane8, plane9, plane10
     };
 
-    for (auto &plane : planes) {
-        plane.rotateX(25);
-        plane.rotateY(25);
-        plane.rotateZ(1);
-    }
+//    for (auto &plane : planes) {
+//        plane.rotateX(25);
+//        plane.rotateY(25);
+//        plane.rotateZ(1);
+//    }
 
     draw(renderer, planes, NUMBER_PLANES);
 
@@ -127,15 +127,22 @@ int main(int argc, char* argv[]) {
                 int dx = previousMouseX - xMouse;
                 int dy = previousMouseY - yMouse;
                 if (mousePressedRight) {
+                    double x = planes[1].getPoints()[3].x - (planes[0].getPoints()[2].x - planes[0].getPoints()[1].x) / 2;
+                    double y = planes[1].getPoints()[3].y - (planes[0].getPoints()[2].y - planes[0].getPoints()[1].y) / 2;
+                    double z = planes[1].getPoints()[3].z - (planes[0].getPoints()[2].z - planes[0].getPoints()[1].z) / 2;
+                    double temp = sqrt(x * x + y * y + z * z);
                     if (dx > 0) {
                         for (auto &plane : planes) {
-                            plane.rotateZ(-ROTATION_ANGLE);
+//                            plane.rotateZ(-ROTATION_ANGLE);
+                            plane.rotateAxis(x/temp, y/temp, z/temp, 2);
                         }
                     } else if (dx < 0) {
                         for (auto &plane : planes) {
-                            plane.rotateZ(ROTATION_ANGLE);
+//                            plane.rotateZ(ROTATION_ANGLE);
+                            plane.rotateAxis(x/temp, y/temp, z/temp, -2);
                         }
                     }
+//                    draw(renderer, planes, NUMBER_PLANES);
                 } else {
                     if (dx > 0) {
                         for (auto &plane : planes) {

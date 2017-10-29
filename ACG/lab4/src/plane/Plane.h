@@ -22,6 +22,8 @@ public:
     void rotateY(double angle);
     void rotateZ(double angle);
     void calculatePlane();
+
+    void rotateAxis(double x, double y, double z, double angle);
 };
 
 
