@@ -13,6 +13,9 @@ int windowHeight = DEFAULT_WINDOW_HEIGHT;
 
 #define NUMBER_PLANES 10
 #define DASH_STEP 8
+#define ROTATION_ANGLE 2
+#define REACTION_TIME 35
+#define DRAW_INVISIBLE false
 
 Buffer *buffer = nullptr;
 
@@ -99,34 +102,67 @@ int main(int argc, char* argv[]) {
     };
 
     for (auto &plane : planes) {
-        plane.rotateX(89);
-        plane.rotateY(89);
-        plane.rotateZ(40);
+        plane.rotateX(25);
+        plane.rotateY(25);
+        plane.rotateZ(1);
     }
 
     draw(renderer, planes, NUMBER_PLANES);
 
     int lastTime = 0, currentTime;
+    int xMouse, previousMouseX = 0, yMouse, previousMouseY = 0;
+    bool mousePressedLeft = false, mousePressedRight = false;
 
     bool check = true;
     while(check) {
         SDL_Event event{};
         currentTime = SDL_GetTicks();
 
-//        if (currentTime - lastTime > 70) {
-//            lastTime = currentTime;
-//            for (auto &plane : planes) {
-//                plane.rotateY(2);
-//                plane.rotateX(2);
-//                plane.rotateZ(2);
-//            }
-//
-//            draw(renderer, planes, 6);
-//        }
-
 
 
         while(SDL_PollEvent(&event) && check) {
+            SDL_GetMouseState(&xMouse,&yMouse);
+            if (currentTime - lastTime > REACTION_TIME && (mousePressedLeft || mousePressedRight)) {
+                lastTime = currentTime;
+                int dx = previousMouseX - xMouse;
+                int dy = previousMouseY - yMouse;
+                if (mousePressedRight) {
+                    if (dx > 0) {
+                        for (auto &plane : planes) {
+                            plane.rotateZ(-ROTATION_ANGLE);
+                        }
+                    } else if (dx < 0) {
+                        for (auto &plane : planes) {
+                            plane.rotateZ(ROTATION_ANGLE);
+                        }
+                    }
+                } else {
+                    if (dx > 0) {
+                        for (auto &plane : planes) {
+                            plane.rotateY(-ROTATION_ANGLE);
+                        }
+                    } else if (dx < 0) {
+                        for (auto &plane : planes) {
+                            plane.rotateY(ROTATION_ANGLE);
+                        }
+                    }
+
+                    if (dy > 0) {
+                        for (auto &plane : planes) {
+                            plane.rotateX(-ROTATION_ANGLE);
+                        }
+                    } else if (dy < 0) {
+                        for (auto &plane : planes) {
+                            plane.rotateX(ROTATION_ANGLE);
+                        }
+                    }
+                }
+
+
+                draw(renderer, planes, NUMBER_PLANES);
+            }
+            previousMouseX = xMouse;
+            previousMouseY = yMouse;
             switch(event.type) {
                 case SDL_QUIT:
                     check = false;
@@ -134,29 +170,28 @@ int main(int argc, char* argv[]) {
                 case SDL_WINDOWEVENT:
                     if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
                         SDL_GetWindowSize(window, &windowWidth, &windowHeight);
-//                        buffer->initBuffer(windowHeight, windowWidth);
+                        buffer->initBuffer(windowHeight, windowWidth);
                         // draw here
                     }
                     break;
                 case SDL_MOUSEBUTTONDOWN:
                     if (event.button.button == SDL_BUTTON_LEFT) {
-                        for (auto &plane : planes) {
-                            plane.rotateY(2);
-                            plane.rotateX(2);
-                            plane.rotateZ(2);
+                        if (!mousePressedLeft && !mousePressedRight) {
+                            mousePressedLeft = true;
                         }
-
-                        draw(renderer, planes, NUMBER_PLANES);
-
+                    }
+                    if (event.button.button == SDL_BUTTON_RIGHT) {
+                        if (!mousePressedLeft && !mousePressedRight) {
+                            mousePressedRight = true;
+                        }
                     }
                     break;
                 case SDL_MOUSEBUTTONUP:
                     if (event.button.button == SDL_BUTTON_LEFT) {
-
-
-                        draw(renderer, planes, NUMBER_PLANES);
-
-
+                        mousePressedLeft = false;
+                    }
+                    if (event.button.button == SDL_BUTTON_RIGHT) {
+                        mousePressedRight = false;
                     }
                     break;
                 default:
@@ -181,37 +216,18 @@ void draw(SDL_Renderer *renderer, Plane *planes, int numberPlains) {
 
         buffer->clearTempBuffer();
         for (int j = 0; j < 4; j++) {
-            if (points[j].y < points[(j + 1) % 4].y) {
-                drawLineInZBuffer(points[j], points[(j + 1) % 4], plane, false);
-            } else if (points[j].y > points[(j + 1) % 4].y) {
-                drawLineInZBuffer(points[(j + 1) % 4], points[j], plane, false);
-            } else if (points[j].x > points[(j + 1) % 4].x) {
-                drawLineInZBuffer(points[(j + 1) % 4], points[j], plane, false);
-            } else {
-                drawLineInZBuffer(points[j], points[(j + 1) % 4], plane, false);
-            }
+            drawLineInZBuffer(points[j], points[(j + 1) % 4], plane, false);
         }
         buffer->fillPlaneInTempBuffer(plane.getLowPoint(windowWidth, windowHeight), plane.getMaxPoint(windowWidth, windowHeight), plane);
         /* fill hole in plane*/
         if (plane.withHole) {
             points = plane.hole->getPoints();
             for (int j = 0; j < 4; j++) {
-                if (points[j].y < points[(j + 1) % 4].y) {
-                    drawLineInZBuffer(points[j], points[(j + 1) % 4], plane, true);
-                } else if (points[j].y > points[(j + 1) % 4].y) {
-                    drawLineInZBuffer(points[(j + 1) % 4], points[j], plane, true);
-                } else if (points[j].x > points[(j + 1) % 4].x) {
-                    drawLineInZBuffer(points[(j + 1) % 4], points[j], plane, true);
-                } else {
-                    drawLineInZBuffer(points[j], points[(j + 1) % 4], plane, true);
-                }
+                drawLineInZBuffer(points[j], points[(j + 1) % 4], plane, true);
             }
         }
         buffer->fillHoleInTempBuffer(plane.getLowPoint(windowWidth, windowHeight), plane.getMaxPoint(windowWidth, windowHeight), plane);
-
         buffer->shiftToMainBuffer();
-
-
     }
 
     SDL_SetRenderDrawColor(renderer, 51, 191, 16, 255);
@@ -219,15 +235,7 @@ void draw(SDL_Renderer *renderer, Plane *planes, int numberPlains) {
         Plane plane = planes[i];
         Point *points = plane.getPoints();
         for (int j = 0; j < 4; j++) {
-            if (points[j].y < points[(j + 1) % 4].y) {
-                drawLine(renderer, points[j], points[(j + 1) % 4], plane);
-            } else if (points[j].y > points[(j + 1) % 4].y) {
-                drawLine(renderer, points[(j + 1) % 4], points[j], plane);
-            } else if (points[j].x > points[(j + 1) % 4].x) {
-                drawLine(renderer, points[(j + 1) % 4], points[j], plane);
-            } else {
-                drawLine(renderer, points[j], points[(j + 1) % 4], plane);
-            }
+           drawLine(renderer, points[j], points[(j + 1) % 4], plane);
         }
     }
     SDL_RenderPresent(renderer);
@@ -256,11 +264,10 @@ void drawLineInZBuffer(Point startPoint, Point endPoint, Plane &plane, bool hole
                 d += d1;
             }
             z += dz;
-//            buffer->setTempBuffer(int(round(x + windowWidth / 2)), int(round(y + windowHeight / 2)), plane.getZValue(x, y));
             if (!hole) {
                 buffer->setTempBuffer(int(round(x + windowWidth / 2)), int(round(y + windowHeight / 2)), z);
             } else {
-                buffer->setTempBuffer(int(round(x + windowWidth / 2)), int(round(y + windowHeight / 2)), 15001);
+                buffer->setTempBuffer(int(round(x + windowWidth / 2)), int(round(y + windowHeight / 2)), 15001); // 15001 hole line value
             }
             x += sx;
         }
@@ -279,7 +286,6 @@ void drawLineInZBuffer(Point startPoint, Point endPoint, Plane &plane, bool hole
                 d += d1;
             }
             z += dz;
-//            buffer->setTempBuffer(int(round(x + windowWidth / 2)), int(round(y + windowHeight / 2)), plane.getZValue(x, y));
             if (!hole) {
                 buffer->setTempBuffer(int(round(x + windowWidth / 2)), int(round(y + windowHeight / 2)), z);
             } else {
@@ -295,11 +301,13 @@ void drawPoint(SDL_Renderer *renderer, int x, int y, bool &dashLine, int &dashSt
     bool check = temp < depth  && abs(static_cast<int>(round(temp - depth))) > 2;
     dashLine = check;
     if (dashLine) {
-        if (dashStep % DASH_STEP == 0 || dashStep % DASH_STEP == 1) {
-//            SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-//            SDL_RenderDrawPoint(renderer, x, y);
+        if (DRAW_INVISIBLE) {
+            if (dashStep % DASH_STEP == 0 || dashStep % DASH_STEP == 1) {
+                SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+                SDL_RenderDrawPoint(renderer, x, y);
+            }
+            dashStep++;
         }
-        dashStep++;
     } else {
         SDL_SetRenderDrawColor(renderer, 51, 191, 16, 255);
         SDL_RenderDrawPoint(renderer, x , y);
@@ -330,7 +338,6 @@ void drawLine(SDL_Renderer *renderer, Point startPoint, Point endPoint, Plane &p
                 d += d1;
             }
             z += dz;
-//            drawPoint(renderer, int(round(x + windowWidth / 2)), int(round(y + windowHeight / 2)), dashLine, dashStep, plane.getZValue(x, y));
             drawPoint(renderer, int(round(x + windowWidth / 2)), int(round(y + windowHeight / 2)), dashLine, dashStep, z);
             x += sx;
         }
@@ -349,7 +356,6 @@ void drawLine(SDL_Renderer *renderer, Point startPoint, Point endPoint, Plane &p
                 d += d1;
             }
             z += dz;
-//            drawPoint(renderer, int(round(x + windowWidth / 2)), int(round(y + windowHeight / 2)), dashLine, dashStep, plane.getZValue(x, y));
             drawPoint(renderer, int(round(x + windowWidth / 2)), int(round(y + windowHeight / 2)), dashLine, dashStep, z);
             y += sy;
         }
