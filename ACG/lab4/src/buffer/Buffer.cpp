@@ -72,6 +72,9 @@ void Buffer::fillPlaneInTempBuffer(Point min, Point max, Plane &plane) {
 }
 
 void Buffer::setTempBuffer(int x, int y, double z) {
+    if (x > width || y > height || x < 0 || y < 0) {
+        return;
+    }
     this->temp_buffer[y][x] = z;
 }
 
@@ -86,6 +89,9 @@ void Buffer::shiftToMainBuffer() {
 }
 
 double Buffer::getValue(int x, int y) {
+    if (x > width || y > height || x < 0 || y < 0) {
+        return 0;
+    }
     return this->buffer[y][x];
 }
 

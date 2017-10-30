@@ -1,5 +1,5 @@
-#include <math.h>
 #include "Plane.h"
+#include <cmath>
 
 void Plane::setPoints(Point point1, Point point2, Point point3, Point point4) {
     this->points[0] = point1;
@@ -14,6 +14,10 @@ void Plane::setPoints(Point point1, Point point2, Point point3, Point point4) {
 
 Point *Plane::getPoints() {
     return this->points;
+}
+
+Point *Plane::getRotationPoints() {
+    return this->rotationPoints;
 }
 
 Point Plane::getMaxPoint(int windowWidth, int windowHeight) {
@@ -113,13 +117,10 @@ void Plane::rotateAxis(double rx, double ry, double rz, double angle) {
     angle *= 3.14159265 / 180;
     double temp = 1 - cos(angle);
     for (int i = 0; i < 4; i++) {
-        double x = rotationPoints[i].x, y = rotationPoints[i].y, z = rotationPoints[i].z;
+        double x = rotationPoints[i].x , y = rotationPoints[i].y, z = rotationPoints[i].z;
         double tempX = x * (rx * rx * temp + cos(angle)) + y * (rx * ry * temp - rz * sin(angle)) + z * (rx * rz * temp + ry * sin(angle));
         double tempY = x * (rx * ry * temp + rz * sin(angle)) + y * (ry * ry * temp + cos(angle)) + z * (ry * rz * temp - rx * sin(angle));
         double tempZ = x * (rx * rz * temp - ry * sin(angle)) + y * (ry * rz * temp + rx * sin(angle)) + z * (rz *  rz * temp + cos(angle));
-        points[i].x = round(tempX);
-        points[i].y = round(tempY);
-        points[i].z = round(tempZ);
         rotationPoints[i].x = tempX;
         rotationPoints[i].y = tempY;
         rotationPoints[i].z = tempZ;
@@ -134,6 +135,20 @@ void Plane::makeProjection(int k, int windowWidth, int windowHeight) {
     for (int i = 0; i < 4; i++) {
         points[i].y = int(round(round(rotationPoints[i].y) * k / (round(rotationPoints[i].z) + k)));
         points[i].x = int(round(round(rotationPoints[i].x) * k / (round(rotationPoints[i].z) + k)));
+    }
+}
+
+void Plane::shiftCoordinates(double x, double y, double z) {
+    if (withHole) {
+        this->hole->shiftCoordinates(x, y, z);
+    }
+    for (int  i = 0; i < 4; i++) {
+        rotationPoints[i].x += x;
+        rotationPoints[i].y += y;
+        rotationPoints[i].z += z;
+        points[i].x = round(rotationPoints[i].x);
+        points[i].y = round(rotationPoints[i].y);
+        points[i].z = round(rotationPoints[i].z);
     }
 }
 

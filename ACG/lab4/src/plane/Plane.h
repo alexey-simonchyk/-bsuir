@@ -21,6 +21,9 @@ public:
     void rotateZ(double angle);
     void makeProjection(int k, int windowWidth, int windowHeight);
 
+    void shiftCoordinates(double x, double y, double z);
+    Point *getRotationPoints();
+
     void rotateAxis(double x, double y, double z, double angle);
 };
 

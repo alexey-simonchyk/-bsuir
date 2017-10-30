@@ -54,6 +54,14 @@ int main(int argc, char* argv[]) {
     W /= 2;
     H /= 2;
     L /= 2;
+
+    Point temp1 = {.x = 0, .y = 0, .z = 0};
+    Point temp2 = {.x = 0, .y = 0, .z = 250};
+    Point temp3 = {.x = 250, .y = 0, .z = 250};
+    Point temp4 = {.x = 250, .y = 0, .z = 0};
+    Plane tempPlane;
+    tempPlane.setPoints(temp1, temp2, temp3, temp4);
+
     Point x1 = {.x = -W, .y = -H, .z = -L};
     Point x2 = {.x = -W, .y = -H, .z = L};
     Point x3 = {.x = W, .y = -H, .z = L};
@@ -103,9 +111,10 @@ int main(int argc, char* argv[]) {
             plane1, plane2, plane3, plane4, plane5, plane6, plane7, plane8, plane9, plane10
     };
 
-    for (Plane &plane : planes) {
-        plane.rotateY(-29);
-    }
+    // START FIGURE ROTATION
+//    for (Plane &plane : planes) {
+//        plane.rotateY(180);
+//    }
     draw(renderer, planes, NUMBER_PLANES);
 
     int lastTime = 0, currentTime;
@@ -139,21 +148,31 @@ int main(int argc, char* argv[]) {
                 int dy = previousMouseY - yMouse;
                 if (mousePressedLeft && mousePressedRight) {
 
-                    double x = planes[1].getPoints()[3].x - (planes[0].getPoints()[2].x - planes[0].getPoints()[1].x) / 2;
-                    double y = planes[1].getPoints()[3].y - (planes[0].getPoints()[2].y - planes[0].getPoints()[1].y) / 2;
-                    double z = planes[1].getPoints()[3].z - (planes[0].getPoints()[2].z - planes[0].getPoints()[1].z) / 2;
-                    double temp = sqrt(x * x + y * y + z * z);
+                    // vector of rotation axis
+                    double vx = -planes[1].getRotationPoints()[3].x, vy = -planes[1].getRotationPoints()[3].y, vz = -planes[1].getRotationPoints()[3].z;
+
+                    double x = (planes[0].getRotationPoints()[1].x + planes[0].getRotationPoints()[2].x) / 2 + vx;
+                    double y = (planes[0].getRotationPoints()[1].y + planes[0].getRotationPoints()[2].y) / 2 + vy;
+                    double z = (planes[0].getRotationPoints()[1].z + planes[0].getRotationPoints()[2].z) / 2 + vz;
+                    double temp = sqrt(x * x + y * y + z * z); // for vector normalization
+                    x /= temp;
+                    z /= temp;
+                    y /= temp;
 
                     if (dx > 0) {
                         for (auto &plane : planes) {
-                            plane.rotateAxis(x/temp, y/temp, z/temp, 2);
+                            plane.shiftCoordinates(vx, vy, vz);
+                            plane.rotateAxis(x, y, z, ROTATION_ANGLE);
+                            plane.shiftCoordinates(-vx, -vy, -vz);
                         }
                     } else if (dx < 0) {
                         for (auto &plane : planes) {
-                            plane.rotateAxis(x/temp, y/temp, z/temp, -2);
+                            plane.shiftCoordinates(vx, vy, vz);
+                            plane.rotateAxis(x, y, z, -ROTATION_ANGLE);
+                            plane.shiftCoordinates(-vx, -vy, -vz);
                         }
                     }
-                } else if (mousePressedRight) {
+                } /*else if (mousePressedRight) {
                     if (dx > 0) {
                         for (auto &plane : planes) {
                             plane.rotateZ(-ROTATION_ANGLE);
@@ -183,7 +202,7 @@ int main(int argc, char* argv[]) {
                             plane.rotateX(ROTATION_ANGLE);
                         }
                     }
-                }
+                }*/
 
                 draw(renderer, planes, NUMBER_PLANES);
             }
