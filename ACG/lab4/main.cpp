@@ -55,13 +55,6 @@ int main(int argc, char* argv[]) {
     H /= 2;
     L /= 2;
 
-    Point temp1 = {.x = 0, .y = 0, .z = 0};
-    Point temp2 = {.x = 0, .y = 0, .z = 250};
-    Point temp3 = {.x = 250, .y = 0, .z = 250};
-    Point temp4 = {.x = 250, .y = 0, .z = 0};
-    Plane tempPlane;
-    tempPlane.setPoints(temp1, temp2, temp3, temp4);
-
     Point x1 = {.x = -W, .y = -H, .z = -L};
     Point x2 = {.x = -W, .y = -H, .z = L};
     Point x3 = {.x = W, .y = -H, .z = L};
@@ -172,7 +165,7 @@ int main(int argc, char* argv[]) {
                             plane.shiftCoordinates(-vx, -vy, -vz);
                         }
                     }
-                } /*else if (mousePressedRight) {
+                } else if (mousePressedRight) {
                     if (dx > 0) {
                         for (auto &plane : planes) {
                             plane.rotateZ(-ROTATION_ANGLE);
@@ -202,7 +195,7 @@ int main(int argc, char* argv[]) {
                             plane.rotateX(ROTATION_ANGLE);
                         }
                     }
-                }*/
+                }
 
                 draw(renderer, planes, NUMBER_PLANES);
             }
