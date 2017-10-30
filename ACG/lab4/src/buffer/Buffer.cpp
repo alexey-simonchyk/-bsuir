@@ -48,21 +48,26 @@ void Buffer::fillPlaneInTempBuffer(Point min, Point max, Plane &plane) {
     min.y = min.y < 0 ? 0 : min.y;
     max.x = max.x < 0 ? 0 : max.x;
     max.y = max.y < 0 ? 0 : max.y;
+    int counter = 0;
 
     for (int i = int(round(min.y)); i <= max.y && i <= this->height; i++) {
         startPoint.x = -600;
         for (int j = int(round(min.x)); j <= max.x && j <= this->width; j++) {
             double temp = this->temp_buffer[i][j];
-
             if (temp != BACKGROUND_BUFFER && startPoint.x != -600) {
+                double dz = (temp - startPoint.z) / counter;
+                double z = startPoint.z;
                 for (int k = int(round(startPoint.x + 1)); k < j; k++) {
-                    double z = plane.getZValue(k - (this->width + 1) / 2, i - (this->height + 1) / 2);
+//                    double z = plane.getZValue(k - (this->width + 1) / 2, i - (this->height + 1) / 2);
                     this->temp_buffer[i][k] = z;
+                    z += dz;
                 }
             }
             if (temp != BACKGROUND_BUFFER) {
-                startPoint.set(j, i, 0);
+                startPoint.set(j, i, temp);
+                counter = 0;
             }
+            counter++;
         }
     }
 }

@@ -26,6 +26,9 @@ Point Plane::getMaxPoint(int windowWidth, int windowHeight) {
         if (max.y < this->points[i].y) {
             max.y = this->points[i].y;
         }
+        if (max.z < this->points[i].z) {
+            max.z = this->points[i].z;
+        }
     }
     max.x += windowWidth / 2;
     max.y += windowHeight / 2;
@@ -40,6 +43,9 @@ Point Plane::getLowPoint(int windowWidth, int windowHeight) {
         }
         if (min.y > this->points[i].y) {
             min.y = this->points[i].y;
+        }
+        if (min.z > this->points[i].z) {
+            min.z = this->points[i].z;
         }
     }
     min.x += windowWidth / 2;
@@ -163,10 +169,10 @@ void Plane::makeProjection(int k, int windowWidth, int windowHeight) {
     if (withHole) {
         hole->makeProjection(k, windowWidth, windowHeight);
     }
+    this->calculatePlane();
     for (int i = 0; i < 4; i++) {
         points[i].y = int(round(round(rotationPoints[i].y) * k / (round(rotationPoints[i].z) + k)));
         points[i].x = int(round(round(rotationPoints[i].x) * k / (round(rotationPoints[i].z) + k)));
     }
-    this->calculatePlane();
 }
 
