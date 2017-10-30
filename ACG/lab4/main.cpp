@@ -16,7 +16,7 @@ int windowHeight = DEFAULT_WINDOW_HEIGHT;
 #define NUMBER_PLANES 10
 #define DASH_STEP 8
 #define ROTATION_ANGLE 2
-#define REACTION_TIME 35
+#define REACTION_TIME 15
 #define DRAW_INVISIBLE false
 
 Buffer *buffer = nullptr;
@@ -197,7 +197,7 @@ int main(int argc, char* argv[]) {
                     if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
                         SDL_GetWindowSize(window, &windowWidth, &windowHeight);
                         buffer->initBuffer(windowHeight, windowWidth);
-                        // draw here
+                        draw(renderer, planes, NUMBER_PLANES);
                     }
                     break;
                 case SDL_MOUSEBUTTONDOWN:
@@ -220,7 +220,7 @@ int main(int argc, char* argv[]) {
                     continue;
             }
         }
-        SDL_Delay(15);
+        SDL_Delay(5);
     }
 
     SDL_DestroyRenderer(renderer);
@@ -295,7 +295,7 @@ void drawLineInZBuffer(Point startPoint, Point endPoint, Plane &plane, bool hole
             if (!hole) {
                 buffer->setTempBuffer(int(round(x + windowWidth / 2)), int(round(y + windowHeight / 2)), z);
             } else {
-                buffer->setTempBuffer(int(round(x + windowWidth / 2)), int(round(y + windowHeight / 2)), 15001); // 15001 hole line value
+                buffer->setTempBuffer(int(round(x + windowWidth / 2)), int(round(y + windowHeight / 2)), HOLE); // 15001 hole line value
             }
             x += sx;
         }
@@ -317,7 +317,7 @@ void drawLineInZBuffer(Point startPoint, Point endPoint, Plane &plane, bool hole
             if (!hole) {
                 buffer->setTempBuffer(int(round(x + windowWidth / 2)), int(round(y + windowHeight / 2)), z);
             } else {
-                buffer->setTempBuffer(int(round(x + windowWidth / 2)), int(round(y + windowHeight / 2)), 15001);
+                buffer->setTempBuffer(int(round(x + windowWidth / 2)), int(round(y + windowHeight / 2)), HOLE);
             }
             y += sy;
         }
@@ -331,8 +331,7 @@ void drawPoint(SDL_Renderer *renderer, int x, int y, bool &dashLine, int &dashSt
     }
 
     double temp = buffer->getValue(x, y);
-    bool check = temp < depth  && abs(static_cast<int>(round(temp - depth))) > 2;
-    dashLine = check;
+    dashLine = temp < depth  && abs(static_cast<int>(round(temp - depth))) > 2;
     if (dashLine) {
         if (DRAW_INVISIBLE) {
             if (dashStep % DASH_STEP == 0 || dashStep % DASH_STEP == 1) {

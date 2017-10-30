@@ -58,7 +58,6 @@ void Buffer::fillPlaneInTempBuffer(Point min, Point max, Plane &plane) {
                 double dz = (temp - startPoint.z) / counter;
                 double z = startPoint.z;
                 for (int k = int(round(startPoint.x + 1)); k < j; k++) {
-//                    double z = plane.getZValue(k - (this->width + 1) / 2, i - (this->height + 1) / 2);
                     this->temp_buffer[i][k] = z;
                     z += dz;
                 }

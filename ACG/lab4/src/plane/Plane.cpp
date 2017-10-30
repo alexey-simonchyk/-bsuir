@@ -10,7 +10,6 @@ void Plane::setPoints(Point point1, Point point2, Point point3, Point point4) {
     this->rotationPoints[1] = point2;
     this->rotationPoints[2] = point3;
     this->rotationPoints[3] = point4;
-    this->calculatePlane();
 }
 
 Point *Plane::getPoints() {
@@ -53,23 +52,6 @@ Point Plane::getLowPoint(int windowWidth, int windowHeight) {
     return min;
 }
 
-double Plane::getZValue(double x, double y) {
-
-    double z;
-    if (C == 0) {
-        double z = points[0].z;
-        for (int i = 1; i < 4; i++) {
-            if (z < points[i].z) {
-                z = points[i].z;
-            }
-        }
-        return z;
-    }
-//    z = ((y - y1) * B - (x - x1) * A) / C + z1;
-    z = -1 * (A * round(x) + B * round(y) + D) / C;
-    return round(z);
-}
-
 void Plane::rotateX(double angle) {
     if (withHole) {
         hole->rotateX(angle);
@@ -85,7 +67,6 @@ void Plane::rotateX(double angle) {
         rotationPoints[i].z = tempZ;
 
     }
-    this->calculatePlane();
 }
 
 void Plane::rotateY(double angle) {
@@ -102,7 +83,6 @@ void Plane::rotateY(double angle) {
         rotationPoints[i].x = tempX;
         rotationPoints[i].z = tempZ;
     }
-    this->calculatePlane();
 }
 
 void Plane::rotateZ(double angle) {
@@ -119,23 +99,6 @@ void Plane::rotateZ(double angle) {
         rotationPoints[i].x = tempX;
         rotationPoints[i].y = tempY;
     }
-    this->calculatePlane();
-}
-
-void Plane::calculatePlane() {
-
-    double y1 = round(points[0].y), y2 = round(points[1].y), y3 = round(points[2].y);
-    double x1 = round(points[0].x), x2 = round(points[1].x), x3 = round(points[2].x);
-    double z1 = round(points[0].z), z2 = round(points[1].z), z3 = round(points[2].z);
-
-//    A = y1 * (z2 - z3) + y2 * (z3 - z1) + y3 * (z1 - z2);
-//    B = z1 * (x2 - x3) + z2 * (x3 - x1) + z3 * (x1 - x2);
-//    C = x1 * (y2 - y3) + x2 * (y3 - y1) + x3 * (y1 - y2);
-    D = -1 * (x1 * (y2 * z3 - y3 * z2) + x2 * (y3 * z1 - y1 * z3) + x3 * (y1 * z2 - y2 * z1));
-
-    A = (y2 - y1) * (z3 - z1) - (z2 - z1) * (y3 - y1);
-    B = -((x2 - x1) * (z3 - z1) - (z2 - z1) * (x3 - x1));
-    C = (x2 - x1) * (y3 - y1) - (y2 - y1) * (x3 - x1);
 }
 
 void Plane::setHole(Plane *plane) {
@@ -162,14 +125,12 @@ void Plane::rotateAxis(double rx, double ry, double rz, double angle) {
         rotationPoints[i].z = tempZ;
     }
 
-    this->calculatePlane();
 }
 
 void Plane::makeProjection(int k, int windowWidth, int windowHeight) {
     if (withHole) {
         hole->makeProjection(k, windowWidth, windowHeight);
     }
-    this->calculatePlane();
     for (int i = 0; i < 4; i++) {
         points[i].y = int(round(round(rotationPoints[i].y) * k / (round(rotationPoints[i].z) + k)));
         points[i].x = int(round(round(rotationPoints[i].x) * k / (round(rotationPoints[i].z) + k)));
