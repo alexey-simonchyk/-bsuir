@@ -3,10 +3,12 @@
 #include "src/point/Point.h"
 #include "src/plane/Plane.h"
 #include "src/buffer/Buffer.h"
-#include <list>
 
 #define DEFAULT_WINDOW_WIDTH 800
 #define DEFAULT_WINDOW_HEIGHT 800
+
+#define PERSPECTIVE_PROJECTION true
+int projection_k = 1000;
 
 int windowWidth = DEFAULT_WINDOW_WIDTH;
 int windowHeight = DEFAULT_WINDOW_HEIGHT;
@@ -101,12 +103,9 @@ int main(int argc, char* argv[]) {
             plane1, plane2, plane3, plane4, plane5, plane6, plane7, plane8, plane9, plane10
     };
 
-//    for (auto &plane : planes) {
-//        plane.rotateX(25);
-//        plane.rotateY(25);
-//        plane.rotateZ(1);
-//    }
-
+    for (Plane &plane : planes) {
+        plane.rotateY(-29);
+    }
     draw(renderer, planes, NUMBER_PLANES);
 
     int lastTime = 0, currentTime;
@@ -118,19 +117,33 @@ int main(int argc, char* argv[]) {
         SDL_Event event{};
         currentTime = SDL_GetTicks();
 
-
-
         while(SDL_PollEvent(&event) && check) {
+            if(event.wheel.y == 1) // scroll up
+            {
+                if (projection_k > 300) {
+                    projection_k -= 50;
+                    draw(renderer, planes, NUMBER_PLANES);
+                }
+            }
+            else if(event.wheel.y == -1) // scroll down
+            {
+                if (projection_k < 2000) {
+                    projection_k += 50;
+                    draw(renderer, planes, NUMBER_PLANES);
+                }
+            }
             SDL_GetMouseState(&xMouse,&yMouse);
             if (currentTime - lastTime > REACTION_TIME && (mousePressedLeft || mousePressedRight)) {
                 lastTime = currentTime;
                 int dx = previousMouseX - xMouse;
                 int dy = previousMouseY - yMouse;
                 if (mousePressedLeft && mousePressedRight) {
+
                     double x = planes[1].getPoints()[3].x - (planes[0].getPoints()[2].x - planes[0].getPoints()[1].x) / 2;
                     double y = planes[1].getPoints()[3].y - (planes[0].getPoints()[2].y - planes[0].getPoints()[1].y) / 2;
                     double z = planes[1].getPoints()[3].z - (planes[0].getPoints()[2].z - planes[0].getPoints()[1].z) / 2;
                     double temp = sqrt(x * x + y * y + z * z);
+
                     if (dx > 0) {
                         for (auto &plane : planes) {
                             plane.rotateAxis(x/temp, y/temp, z/temp, 2);
@@ -172,7 +185,6 @@ int main(int argc, char* argv[]) {
                     }
                 }
 
-
                 draw(renderer, planes, NUMBER_PLANES);
             }
             previousMouseX = xMouse;
@@ -208,6 +220,7 @@ int main(int argc, char* argv[]) {
                     continue;
             }
         }
+        SDL_Delay(15);
     }
 
     SDL_DestroyRenderer(renderer);
@@ -217,6 +230,11 @@ int main(int argc, char* argv[]) {
 }
 
 void draw(SDL_Renderer *renderer, Plane *planes, int numberPlains) {
+    if (PERSPECTIVE_PROJECTION) {
+        for (int i = 0; i < numberPlains; i++) {
+            planes[i].makeProjection(projection_k, windowWidth, windowHeight);
+        }
+    }
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderClear(renderer);
     buffer->clearBuffer();
@@ -307,6 +325,11 @@ void drawLineInZBuffer(Point startPoint, Point endPoint, Plane &plane, bool hole
 }
 
 void drawPoint(SDL_Renderer *renderer, int x, int y, bool &dashLine, int &dashStep, double depth) {
+
+    if (x > windowWidth || y > windowHeight || x < 0 || y < 0) {
+        return;
+    }
+
     double temp = buffer->getValue(x, y);
     bool check = temp < depth  && abs(static_cast<int>(round(temp - depth))) > 2;
     dashLine = check;
