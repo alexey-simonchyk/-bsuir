@@ -56,10 +56,10 @@ void Buffer::fillPlaneInTempBuffer(Point min, Point max, Plane &plane) {
             double temp = this->temp_buffer[i][j];
             if (temp != BACKGROUND_BUFFER && startPoint.x != -600) {
                 double dz = (temp - startPoint.z) / counter;
-                double z = startPoint.z;
+                double z = startPoint.z + dz;
                 for (int k = int(round(startPoint.x + 1)); k < j; k++) {
-                    this->temp_buffer[i][k] = z;
                     z += dz;
+                    this->temp_buffer[i][k] = z;
                 }
             }
             if (temp != BACKGROUND_BUFFER) {

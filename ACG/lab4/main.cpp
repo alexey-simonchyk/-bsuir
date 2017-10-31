@@ -7,8 +7,8 @@
 #define DEFAULT_WINDOW_WIDTH 800
 #define DEFAULT_WINDOW_HEIGHT 800
 
-#define PERSPECTIVE_PROJECTION true
-int projection_k = 1000;
+#define PERSPECTIVE_PROJECTION false
+int projection_k = 300;
 
 int windowWidth = DEFAULT_WINDOW_WIDTH;
 int windowHeight = DEFAULT_WINDOW_HEIGHT;
@@ -68,6 +68,7 @@ int main(int argc, char* argv[]) {
     W /= 2;
 //    W /= 3;
     H /= 2;
+//    L -= 2;
 //    H /= 12;
     Point x9 = {.x = -W, .y = -H, .z = -L};
     Point x10 = {.x = -W, .y = -H, .z = L};
@@ -106,7 +107,7 @@ int main(int argc, char* argv[]) {
 
     // START FIGURE ROTATION
 //    for (Plane &plane : planes) {
-//        plane.rotateY(180);
+//        plane.rotateY(45);
 //    }
     draw(renderer, planes, NUMBER_PLANES);
 
@@ -122,7 +123,7 @@ int main(int argc, char* argv[]) {
         while(SDL_PollEvent(&event) && check) {
             if(event.wheel.y == 1) // scroll up
             {
-                if (projection_k > 300) {
+                if (projection_k > 250) {
                     projection_k -= 50;
                     draw(renderer, planes, NUMBER_PLANES);
                 }
@@ -265,8 +266,8 @@ void draw(SDL_Renderer *renderer, Plane *planes, int numberPlains) {
             for (int j = 0; j < 4; j++) {
                 drawLineInZBuffer(points[j], points[(j + 1) % 4], plane, true);
             }
+            buffer->fillHoleInTempBuffer(plane.getLowPoint(windowWidth, windowHeight), plane.getMaxPoint(windowWidth, windowHeight), plane);
         }
-        buffer->fillHoleInTempBuffer(plane.getLowPoint(windowWidth, windowHeight), plane.getMaxPoint(windowWidth, windowHeight), plane);
         buffer->shiftToMainBuffer();
     }
 

@@ -135,6 +135,7 @@ void Plane::makeProjection(int k, int windowWidth, int windowHeight) {
     for (int i = 0; i < 4; i++) {
         points[i].y = int(round(round(rotationPoints[i].y) * k / (round(rotationPoints[i].z) + k)));
         points[i].x = int(round(round(rotationPoints[i].x) * k / (round(rotationPoints[i].z) + k)));
+        points[i].z = int(round(round(rotationPoints[i].z) * k / (round(rotationPoints[i].z) + k)));
     }
 }
 
