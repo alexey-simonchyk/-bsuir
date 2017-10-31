@@ -7,8 +7,8 @@
 #define DEFAULT_WINDOW_WIDTH 800
 #define DEFAULT_WINDOW_HEIGHT 800
 
-#define PERSPECTIVE_PROJECTION false
-int projection_k = 300;
+#define PERSPECTIVE_PROJECTION true
+int projection_k = 1000;
 
 int windowWidth = DEFAULT_WINDOW_WIDTH;
 int windowHeight = DEFAULT_WINDOW_HEIGHT;
@@ -348,7 +348,7 @@ void drawPoint(SDL_Renderer *renderer, int x, int y, bool &dashLine, int &dashSt
     if (dashLine) {
         if (DRAW_INVISIBLE) {
             if (dashStep % DASH_STEP == 0 || dashStep % DASH_STEP == 1) {
-                SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+//                SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
                 SDL_RenderDrawPoint(renderer, x, y);
             }
             dashStep++;
