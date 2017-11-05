@@ -3,7 +3,7 @@ import numpy
 import random
 
 
-SAMPLE_RATE = 2048
+SAMPLE_RATE = 512
 B1 = 10
 B2 = 100000
 HARMONIC_RANGE = range(50, 71)
@@ -17,6 +17,14 @@ def generate_signal(length):
             random_number = random.randint(0, 1)
             temp += (-1) ** random_number * B2 * sin(2 * pi * i * j / SAMPLE_RATE)
         result.append(temp)
+    return numpy.array(result)
+
+
+def parabolic_smoothing(signal):
+    result = [temp for temp in signal]
+    for i in range(3, len(result) - 3):
+        result[i] = (1 / 231) * (5 * result[i - 3] - 30 * result[i - 2] + 75 * result[i - 1] + 131 *
+                                 result[i] + 75 * result[i + 1] - 30 * result[i + 2] + 5 * result[i + 3])
     return numpy.array(result)
 
 
@@ -38,6 +46,14 @@ def fourier(signal):
         harmonic_begin_phases.append(atan2(sum_sin, sum_cos))
         harmonic_amplitudes.append(hypot(sum_sin, sum_cos))
     return harmonic_amplitudes, harmonic_begin_phases
+
+
+def median_smooth(signal, N=7, K=5):
+    step = int((N - 1) / 2 + K)
+    result = [temp for temp in signal]
+    for i in range(step, len(result) - step - 1):
+        result[i] = sum([signal[i] for i in range(i - step, i + step + 1)]) / (N - 2 * K)
+    return result
 
 
 def smooth_signal_averaging(signal):
