@@ -48,13 +48,23 @@ def fourier(signal):
     return harmonic_amplitudes, harmonic_begin_phases
 
 
+def median_filter(signal, N=7):
+    result = [temp for temp in signal]
+    step = N // 2
+    for i in range(step, len(signal) - step):
+        temp = signal[i - step: i + step + 1]
+        window = sorted(temp)
+        result[i] = window[N // 2 + 1]
+    return numpy.array(result)
+
+
 def median_smooth(signal, N=7, K=5):
     step = int((N - 1) / 2 + K)
     result = [temp for temp in signal]
     for i in range(step, len(result) - step - 1):
-        result[i] = sum([signal[i] for i in range(i - step, i + step + 1)]) / (N - 2 * K)
-    return result
+        result[i] = sum([result[i] for i in range(i - step, i + step + 1)]) / (N - 2 * K)
+    return numpy.array(result)
 
 
 def smooth_signal_averaging(signal):
-    return numpy.array([signal[0]] + [(signal[i - 1] + signal[i] + signal[i + 1]) / 3 for i in range(1, len(signal) - 1)] + [signal[-1]])
+    return numpy.array([signal[0]] + [numpy.mean(signal[i - 1] + signal[i] + signal[i + 1]) for i in range(1, len(signal) - 1)] + [signal[-1]])
