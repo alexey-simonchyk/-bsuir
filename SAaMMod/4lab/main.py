@@ -5,13 +5,13 @@ STATES_PROBABILITY = {'000': 0, '010': 0, '001': 0, '110': 0, '011': 0, '111': 0
 
 
 def main():
+    q = 50.0
+    pi1 = 90.0
+    pi2 = 0.0
     # q = int(input('Enter q: '))
     # pi1 = int(input('Enter pi1: '))
     # pi2 = int(input('Enter pi2: '))
     # queue_capacity = int(input('Enter queue capacity: '))
-    q = 50.0
-    pi1 = 40.0
-    pi2 = 40.0
     queue_capacity = 2
     number_steps = 100000
 
