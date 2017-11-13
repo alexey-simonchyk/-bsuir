@@ -7,7 +7,7 @@
 #define DEFAULT_WINDOW_WIDTH 800
 #define DEFAULT_WINDOW_HEIGHT 800
 
-#define PERSPECTIVE_PROJECTION true
+#define PERSPECTIVE_PROJECTION false
 int projection_k = 1000;
 
 int windowWidth = DEFAULT_WINDOW_WIDTH;
