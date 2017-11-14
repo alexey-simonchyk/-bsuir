@@ -4,7 +4,7 @@
 #define ROTATE_AMBIENT_LIGHT true
 
 #define ENABLE_POINT_LIGHT true
-#define ROTATE_POINT_LIGHT true
+#define ROTATE_POINT_LIGHT false
 
 #define MOVE_LIGHT false
 
@@ -14,7 +14,8 @@ void keyInput(int key, int x, int y);
 void initPointLight();
 void initAmbientLight();
 
-int rotate_x = 0, rotate_y = 0;
+int rotate_x = 0, rotate_y = 0, rotate_z = 0;
+float temp = 0;
 
 int main(int argc, char** argv)
 {
@@ -27,7 +28,7 @@ int main(int argc, char** argv)
 
     glClearColor (0.3, 0.3, 0.3, 0.0);
     glEnable(GL_LIGHTING);
-    glEnable(GL_NORMALIZE);
+//    glEnable(GL_NORMALIZE);
     glEnable(GL_DEPTH_TEST);
 
     glutDisplayFunc(display);
@@ -48,6 +49,14 @@ void keyInput(int key, int x, int y) {
 
     else if (key == GLUT_KEY_DOWN)
         rotate_x -= 3;
+    else if (key == GLUT_KEY_F1)
+        rotate_z -= 3;
+    else if (key == GLUT_KEY_F2)
+        rotate_z += 3;
+    else if (key == GLUT_KEY_F3)
+        temp -= 0.2;
+    else if (key == GLUT_KEY_F4)
+        temp += 0.2;
 
     glutPostRedisplay();
 }
@@ -58,14 +67,14 @@ void initAmbientLight() {
 
     glEnable(GL_LIGHT0);
 
-//    glLightfv(GL_LIGHT0, GL_DIFFUSE, light0_diffuse);
-//    glLightfv(GL_LIGHT0, GL_POSITION, light0_direction);
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, light0_diffuse);
+    glLightfv(GL_LIGHT0, GL_POSITION, light0_direction);
 
 }
 
 void initPointLight() {
     GLfloat light1_diffuse[] = {1.0, 1.0, 1.0};
-    GLfloat light1_position[] = {0.0, 0.0, 1.0, 1.0};
+    GLfloat light1_position[] = {temp, 0.0, 1.0, 1.0};
 
     glEnable(GL_LIGHT1);
     glLightfv(GL_LIGHT1, GL_DIFFUSE, light1_diffuse);
@@ -82,7 +91,6 @@ void display()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glLoadIdentity();
-    glNormal3f(0.0, 0.0, 1.0);
 
     if (ENABLE_AMBIENT_LIGHT && !ROTATE_AMBIENT_LIGHT) {
         initAmbientLight();
@@ -93,7 +101,8 @@ void display()
 
     glRotatef( rotate_x, 1.0, 0.0, 0.0 );
     glRotatef( rotate_y, 0.0, 1.0, 0.0 );
-
+    glRotatef( rotate_z, 0.0, 0.0, 1.0 );
+//    glNormal3f(0.0, 0.0, 1.0);
     if (ENABLE_AMBIENT_LIGHT && ROTATE_AMBIENT_LIGHT) {
         initAmbientLight();
     }
@@ -164,4 +173,8 @@ void display()
 
     glFlush();
     glutSwapBuffers();
+}
+
+void draw() {
+
 }
