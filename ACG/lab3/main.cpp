@@ -231,11 +231,22 @@ void update(SDL_Renderer *renderer, Rectangle &firstRectangle, Rectangle &second
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderClear(renderer);
 
-    SDL_SetRenderDrawColor(renderer, 51, 191, 16, 255);
-    drawRectangle(renderer, firstRectangle);
+    if (firstRectangle.getDepth() > secondRectangle.getDepth()) {
+        SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+        drawRectangle(renderer, secondRectangle);
 
-    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-    drawRectangle(renderer, secondRectangle);
+        SDL_SetRenderDrawColor(renderer, 51, 191, 16, 255);
+        drawRectangle(renderer, firstRectangle);
+    } else {
+        SDL_SetRenderDrawColor(renderer, 51, 191, 16, 255);
+        drawRectangle(renderer, firstRectangle);
+
+        SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+        drawRectangle(renderer, secondRectangle);
+
+    }
+
+
 
     SDL_RenderPresent(renderer);
 }
